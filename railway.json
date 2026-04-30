@@ -1,7 +1,11 @@
 {
   "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "buildCommand": "echo \"No build step required\""
+  },
   "deploy": {
     "startCommand": "npm start",
+    "numReplicas": 1,
     "healthcheckPath": "/health",
     "restartPolicyType": "on_failure",
     "restartPolicyMaxRetries": 5
