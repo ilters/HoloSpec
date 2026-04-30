@@ -116,6 +116,7 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
   private streamId: string = "-";
   private lastTimestamp: number = 0;
   private connectionStatus: string = "Initializing";
+  private hasLoggedEditorPreviewWarning: boolean = false;
 
   onAwake() {
     this.rgbVisual = this.getRenderMeshVisual(this.rgbWindow, "RGB");
@@ -166,6 +167,18 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
 
   private connect(): void {
     if (this.isConnecting || !this.serverUrl) {
+      return;
+    }
+
+    if (global.deviceInfoSystem.isEditor()) {
+      this.connectionStatus = "Use wearable runtime";
+      if (!this.hasLoggedEditorPreviewWarning) {
+        this.hasLoggedEditorPreviewWarning = true;
+        print(
+          "HoloSpecDualFrameClient: WebSocket streaming is not supported in Lens Studio desktop Preview. Run this lens in a wearable runtime to receive frames.",
+        );
+      }
+      this.refreshStatusText();
       return;
     }
 
@@ -544,21 +557,23 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
       "RGB",
       this.connectionStatus,
       this.streamId,
+      global.deviceInfoSystem.isEditor() ? "Desktop Preview has no WebSocket" : "",
       this.formatFrameInfo(frame, false),
     ];
     const depthLines = [
       "Depth",
       this.connectionStatus,
       this.streamId,
+      global.deviceInfoSystem.isEditor() ? "Run on wearable device" : "",
       this.formatFrameInfo(frame, true),
     ];
 
     if (this.rgbStatusText) {
-      this.rgbStatusText.text = rgbLines.join("\n");
+      this.rgbStatusText.text = rgbLines.filter((line) => line.length > 0).join("\n");
     }
 
     if (this.depthStatusText) {
-      this.depthStatusText.text = depthLines.join("\n");
+      this.depthStatusText.text = depthLines.filter((line) => line.length > 0).join("\n");
     }
   }
 

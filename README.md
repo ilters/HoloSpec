@@ -103,6 +103,7 @@ Important notes:
 - The Lens Studio client prefers binary frames and falls back to the legacy JSON path if needed.
 - Depth is consumed directly from raw `Float32` bytes.
 - RGB still uses Lens Studio's base64 texture decode path locally after binary receipt, which keeps the network transport binary while avoiding a custom JPEG decode path in the lens.
+- Lens Studio desktop Preview does not support this network streaming path. Test the subscriber in wearable runtime rather than expecting the editor Preview panel to open the WebSocket stream.
 
 ## Current Tradeoffs
 
