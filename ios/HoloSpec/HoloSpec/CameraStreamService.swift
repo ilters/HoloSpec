@@ -4,31 +4,20 @@ import Foundation
 import UIKit
 
 final class CameraStreamService: NSObject, ObservableObject {
-    struct ColorPayload: Encodable {
-        let encoding: String
+    struct ColorPayload {
         let width: Int
         let height: Int
-        let data: String
+        let jpegData: Data
     }
 
-    struct DepthPayload: Encodable {
-        let encoding: String
+    struct DepthPayload {
         let width: Int
         let height: Int
         let bytesPerRow: Int
-        let data: String
-        let units: String
+        let data: Data
         let intrinsics: [Float]?
         let referenceDimensions: [Int]?
         let isFiltered: Bool
-    }
-
-    struct FrameEnvelope: Encodable {
-        let type: String
-        let streamId: String
-        let timestamp: TimeInterval
-        let color: ColorPayload
-        let depth: DepthPayload
     }
 
     @Published var endpoint = "wss://holo-speccc.up.railway.app/ws?role=publisher"
@@ -47,7 +36,6 @@ final class CameraStreamService: NSObject, ObservableObject {
     private let sessionQueue = DispatchQueue(label: "com.holospec.capture")
     private let ciContext = CIContext()
     private let streamId = UUID().uuidString
-    private let jsonEncoder = JSONEncoder()
     private let targetFrameInterval: TimeInterval = 0.25
 
     private var configured = false
@@ -303,20 +291,9 @@ final class CameraStreamService: NSObject, ObservableObject {
     }
 
     private func sendFrame(color: ColorPayload, depth: DepthPayload, timestamp: TimeInterval) {
-        let envelope = FrameEnvelope(
-            type: "frame",
-            streamId: streamId,
-            timestamp: timestamp,
-            color: color,
-            depth: depth
-        )
+        let packet = buildBinaryFramePacket(color: color, depth: depth, timestamp: timestamp)
 
-        guard let data = try? jsonEncoder.encode(envelope),
-              let string = String(data: data, encoding: .utf8) else {
-            return
-        }
-
-        webSocketTask?.send(.string(string)) { [weak self] error in
+        webSocketTask?.send(.data(packet)) { [weak self] error in
             if let error {
                 Task {
                     await self?.updateUI(
@@ -347,10 +324,9 @@ final class CameraStreamService: NSObject, ObservableObject {
         }
 
         return ColorPayload(
-            encoding: "jpeg-base64",
             width: cgImage.width,
             height: cgImage.height,
-            data: jpegData.base64EncodedString()
+            jpegData: jpegData
         )
     }
 
@@ -387,16 +363,54 @@ final class CameraStreamService: NSObject, ObservableObject {
         }
 
         return DepthPayload(
-            encoding: "depth-float32-base64",
             width: width,
             height: height,
             bytesPerRow: bytesPerRow,
-            data: data.base64EncodedString(),
-            units: "meters",
+            data: data,
             intrinsics: intrinsics,
             referenceDimensions: referenceDimensions,
             isFiltered: converted.isDepthDataFiltered
         )
+    }
+
+    private func buildBinaryFramePacket(
+        color: ColorPayload,
+        depth: DepthPayload,
+        timestamp: TimeInterval
+    ) -> Data {
+        let streamIdData = Data(streamId.utf8)
+        let headerLength = HoloSpecBinaryProtocol.fixedHeaderLength + streamIdData.count
+        let intrinsics = depth.intrinsics ?? Array(repeating: 0, count: 9)
+        let referenceWidth = depth.referenceDimensions?.first ?? 0
+        let referenceHeight = depth.referenceDimensions?.dropFirst().first ?? 0
+        let flags: UInt16 = depth.isFiltered ? 1 : 0
+
+        var packet = Data(capacity: headerLength + color.jpegData.count + depth.data.count)
+        packet.append(HoloSpecBinaryProtocol.magic)
+        packet.appendUInt8(HoloSpecBinaryProtocol.version)
+        packet.appendUInt8(HoloSpecBinaryProtocol.frameMessageType)
+        packet.appendUInt16LE(UInt16(headerLength))
+        packet.appendFloat64LE(timestamp)
+        packet.appendUInt16LE(UInt16(color.width))
+        packet.appendUInt16LE(UInt16(color.height))
+        packet.appendUInt16LE(UInt16(depth.width))
+        packet.appendUInt16LE(UInt16(depth.height))
+        packet.appendUInt32LE(UInt32(depth.bytesPerRow))
+        packet.appendUInt32LE(UInt32(color.jpegData.count))
+        packet.appendUInt32LE(UInt32(depth.data.count))
+        packet.appendUInt16LE(UInt16(streamIdData.count))
+        packet.appendUInt16LE(UInt16(referenceWidth))
+        packet.appendUInt16LE(UInt16(referenceHeight))
+        packet.appendUInt16LE(flags)
+
+        for index in 0..<9 {
+            packet.appendFloat32LE(intrinsics[index])
+        }
+
+        packet.append(streamIdData)
+        packet.append(color.jpegData)
+        packet.append(depth.data)
+        return packet
     }
 }
 
@@ -454,5 +468,37 @@ private enum StreamError: LocalizedError {
         case .invalidHelloPayload:
             return "Failed to serialize the WebSocket hello packet."
         }
+    }
+}
+
+private enum HoloSpecBinaryProtocol {
+    static let magic = Data([0x48, 0x53, 0x46, 0x31]) // HSF1
+    static let version: UInt8 = 1
+    static let frameMessageType: UInt8 = 1
+    static let fixedHeaderLength = 80
+}
+
+private extension Data {
+    mutating func appendUInt8(_ value: UInt8) {
+        append(contentsOf: [value])
+    }
+
+    mutating func appendUInt16LE(_ value: UInt16) {
+        var littleEndianValue = value.littleEndian
+        Swift.withUnsafeBytes(of: &littleEndianValue) { append(contentsOf: $0) }
+    }
+
+    mutating func appendUInt32LE(_ value: UInt32) {
+        var littleEndianValue = value.littleEndian
+        Swift.withUnsafeBytes(of: &littleEndianValue) { append(contentsOf: $0) }
+    }
+
+    mutating func appendFloat32LE(_ value: Float) {
+        appendUInt32LE(value.bitPattern)
+    }
+
+    mutating func appendFloat64LE(_ value: Double) {
+        var littleEndianValue = value.bitPattern.littleEndian
+        Swift.withUnsafeBytes(of: &littleEndianValue) { append(contentsOf: $0) }
     }
 }

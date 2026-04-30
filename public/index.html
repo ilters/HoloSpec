@@ -148,9 +148,14 @@
       const colorFrameEl = document.getElementById("color-frame");
       const depthCanvas = document.getElementById("depth-canvas");
       const depthContext = depthCanvas.getContext("2d");
+      const FRAME_MAGIC = "HSF1";
+      const FIXED_HEADER_LENGTH = 80;
       const DEPTH_PREVIEW_NEAR_METERS = 0.2;
       const DEPTH_PREVIEW_FAR_METERS = 1.2;
       const MAX_REASONABLE_DEPTH_METERS = 2.0;
+      let currentColorUrl = null;
+      let latestFrame = null;
+      let renderScheduled = false;
 
       function base64ToArrayBuffer(base64) {
         const binary = atob(base64);
@@ -163,6 +168,14 @@
 
       function clamp(value, min, max) {
         return Math.min(max, Math.max(min, value));
+      }
+
+      function bytesToString(bytes) {
+        let result = "";
+        for (let index = 0; index < bytes.length; index += 1) {
+          result += String.fromCharCode(bytes[index]);
+        }
+        return result;
       }
 
       function turboColor(normalized) {
@@ -178,18 +191,68 @@
         ];
       }
 
-      function renderDepthFrame(depth) {
-        const bytes = new Uint8Array(base64ToArrayBuffer(depth.data));
-        const view = new DataView(bytes.buffer);
-        const imageData = new ImageData(depth.width, depth.height);
+      function parseBinaryFrame(buffer) {
+        const view = new DataView(buffer);
+        const magicBytes = new Uint8Array(buffer, 0, 4);
+        const magic = bytesToString(magicBytes);
+        if (magic !== FRAME_MAGIC) {
+          return null;
+        }
+
+        const version = view.getUint8(4);
+        const messageType = view.getUint8(5);
+        const headerLength = view.getUint16(6, true);
+        const timestamp = view.getFloat64(8, true);
+        const colorWidth = view.getUint16(16, true);
+        const colorHeight = view.getUint16(18, true);
+        const depthWidth = view.getUint16(20, true);
+        const depthHeight = view.getUint16(22, true);
+        const depthBytesPerRow = view.getUint32(24, true);
+        const colorLength = view.getUint32(28, true);
+        const depthLength = view.getUint32(32, true);
+        const streamIdLength = view.getUint16(36, true);
+
+        if (version !== 1 || messageType !== 1 || headerLength !== FIXED_HEADER_LENGTH + streamIdLength) {
+          return null;
+        }
+
+        if (buffer.byteLength !== headerLength + colorLength + depthLength) {
+          return null;
+        }
+
+        const streamIdBytes = new Uint8Array(buffer, FIXED_HEADER_LENGTH, streamIdLength);
+        const streamId = bytesToString(streamIdBytes) || "default";
+        const colorBytes = new Uint8Array(buffer, headerLength, colorLength);
+        const depthBytes = new Uint8Array(buffer, headerLength + colorLength, depthLength);
+
+        return {
+          streamId,
+          timestamp,
+          color: {
+            width: colorWidth,
+            height: colorHeight,
+            bytes: colorBytes
+          },
+          depth: {
+            width: depthWidth,
+            height: depthHeight,
+            bytesPerRow: depthBytesPerRow,
+            bytes: depthBytes
+          }
+        };
+      }
+
+      function renderDepthFrame(width, height, bytesPerRow, bytes) {
+        const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        const imageData = new ImageData(width, height);
         let min = Number.POSITIVE_INFINITY;
         let max = 0;
         let validPixels = 0;
-        const totalPixels = depth.width * depth.height;
+        const totalPixels = width * height;
 
-        for (let y = 0; y < depth.height; y += 1) {
-          for (let x = 0; x < depth.width; x += 1) {
-            const offset = y * depth.bytesPerRow + x * 4;
+        for (let y = 0; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            const offset = y * bytesPerRow + x * 4;
             const value = view.getFloat32(offset, true);
             if (Number.isFinite(value) && value > 0 && value < MAX_REASONABLE_DEPTH_METERS) {
               min = Math.min(min, value);
@@ -201,10 +264,10 @@
         const validRatio = validPixels / totalPixels;
         const displayRange = DEPTH_PREVIEW_FAR_METERS - DEPTH_PREVIEW_NEAR_METERS;
 
-        for (let y = 0; y < depth.height; y += 1) {
-          for (let x = 0; x < depth.width; x += 1) {
-            const sourceOffset = y * depth.bytesPerRow + x * 4;
-            const pixelIndex = y * depth.width + x;
+        for (let y = 0; y < height; y += 1) {
+          for (let x = 0; x < width; x += 1) {
+            const sourceOffset = y * bytesPerRow + x * 4;
+            const pixelIndex = y * width + x;
             const value = view.getFloat32(sourceOffset, true);
             const invalid = !Number.isFinite(value) || value <= 0 || value >= MAX_REASONABLE_DEPTH_METERS;
 
@@ -230,8 +293,8 @@
           }
         }
 
-        depthCanvas.width = depth.width;
-        depthCanvas.height = depth.height;
+        depthCanvas.width = width;
+        depthCanvas.height = height;
         depthContext.putImageData(imageData, 0, 0);
 
         return {
@@ -241,8 +304,119 @@
         };
       }
 
+      function setColorFrameFromBytes(bytes) {
+        if (currentColorUrl) {
+          URL.revokeObjectURL(currentColorUrl);
+        }
+
+        const blob = new Blob([bytes], { type: "image/jpeg" });
+        currentColorUrl = URL.createObjectURL(blob);
+        colorFrameEl.src = currentColorUrl;
+      }
+
+      function setColorFrameFromBase64(base64) {
+        if (currentColorUrl) {
+          URL.revokeObjectURL(currentColorUrl);
+          currentColorUrl = null;
+        }
+
+        colorFrameEl.src = `data:image/jpeg;base64,${base64}`;
+      }
+
+      function updateFrameMetadata(streamId, timestamp, colorWidth, colorHeight, depthWidth, depthHeight, depthStats) {
+        const depthSummary = depthStats.minDepth === null
+          ? "no valid depth"
+          : `${depthStats.minDepth.toFixed(2)}-${depthStats.maxDepth.toFixed(2)}m`;
+        const latencyMs = Math.max(0, Math.round(Date.now() - timestamp * 1000));
+
+        streamMetaEl.textContent = `Viewer lag: ${latencyMs}ms`;
+        streamIdEl.textContent = streamId;
+        timestampEl.textContent = new Date(timestamp * 1000).toLocaleString();
+        colorSizeEl.textContent = `${colorWidth} x ${colorHeight}`;
+        depthSizeEl.textContent =
+          `${depthWidth} x ${depthHeight} • valid ${(depthStats.validRatio * 100).toFixed(1)}% • ${depthSummary}`;
+      }
+
+      function renderJsonFrame(message) {
+        if (!message.color || !message.depth) {
+          return;
+        }
+
+        const depthBytes = new Uint8Array(base64ToArrayBuffer(message.depth.data));
+        const depthStats = renderDepthFrame(
+          message.depth.width,
+          message.depth.height,
+          message.depth.bytesPerRow,
+          depthBytes
+        );
+
+        setColorFrameFromBase64(message.color.data);
+        updateFrameMetadata(
+          message.streamId || "default",
+          message.timestamp,
+          message.color.width,
+          message.color.height,
+          message.depth.width,
+          message.depth.height,
+          depthStats
+        );
+      }
+
+      function renderBinaryFrame(buffer) {
+        const frame = parseBinaryFrame(buffer);
+        if (!frame) {
+          return;
+        }
+
+        const depthStats = renderDepthFrame(
+          frame.depth.width,
+          frame.depth.height,
+          frame.depth.bytesPerRow,
+          frame.depth.bytes
+        );
+
+        setColorFrameFromBytes(frame.color.bytes);
+        updateFrameMetadata(
+          frame.streamId,
+          frame.timestamp,
+          frame.color.width,
+          frame.color.height,
+          frame.depth.width,
+          frame.depth.height,
+          depthStats
+        );
+      }
+
+      function scheduleRender() {
+        if (renderScheduled) {
+          return;
+        }
+
+        renderScheduled = true;
+        requestAnimationFrame(() => {
+          renderScheduled = false;
+          const frame = latestFrame;
+          latestFrame = null;
+
+          if (!frame) {
+            return;
+          }
+
+          if (frame.kind === "json") {
+            renderJsonFrame(frame.message);
+          } else {
+            renderBinaryFrame(frame.buffer);
+          }
+
+          if (latestFrame) {
+            scheduleRender();
+          }
+        });
+      }
+
       const wsProtocol = location.protocol === "https:" ? "wss" : "ws";
       const socket = new WebSocket(`${wsProtocol}://${location.host}/ws?role=subscriber`);
+      socket.binaryType = "arraybuffer";
 
       socket.addEventListener("open", () => {
         statusEl.textContent = "Connected";
@@ -254,25 +428,22 @@
       });
 
       socket.addEventListener("message", ({ data }) => {
-        const message = JSON.parse(data);
-        if (message.type !== "frame") {
+        if (typeof data !== "string") {
+          latestFrame = { kind: "binary", buffer: data };
+          scheduleRender();
           return;
         }
 
-        streamMetaEl.textContent = `Server receive: ${new Date(
-          message.serverReceivedAt
-        ).toLocaleTimeString()}`;
-        streamIdEl.textContent = message.streamId;
-        timestampEl.textContent = new Date(message.timestamp * 1000).toLocaleString();
-        colorSizeEl.textContent = `${message.color.width} x ${message.color.height}`;
-        const depthStats = renderDepthFrame(message.depth);
-        const depthSummary = depthStats.minDepth === null
-          ? "no valid depth"
-          : `${depthStats.minDepth.toFixed(2)}-${depthStats.maxDepth.toFixed(2)}m`;
+        const message = JSON.parse(data);
+        if (message.type === "frame") {
+          latestFrame = { kind: "json", message };
+          scheduleRender();
+          return;
+        }
 
-        depthSizeEl.textContent =
-          `${message.depth.width} x ${message.depth.height} • valid ${(depthStats.validRatio * 100).toFixed(1)}% • ${depthSummary}`;
-        colorFrameEl.src = `data:image/jpeg;base64,${message.color.data}`;
+        if (message.type === "hello_ack") {
+          statusEl.textContent = `Subscribed (${message.activeStreams.length} streams cached)`;
+        }
       });
     </script>
   </body>

@@ -25,6 +25,25 @@ type HoloSpecFrameMessage = {
   depth?: HoloSpecDepthPayload;
 };
 
+type HoloSpecBinaryFrame = {
+  streamId: string;
+  timestamp: number;
+  colorWidth: number;
+  colorHeight: number;
+  depthWidth: number;
+  depthHeight: number;
+  depthBytesPerRow: number;
+  colorBytes: Uint8Array;
+  depthBytes: Uint8Array;
+  intrinsics: Float32Array;
+  referenceWidth: number;
+  referenceHeight: number;
+  isFiltered: boolean;
+};
+
+const FRAME_MAGIC = "HSF1";
+const FIXED_HEADER_LENGTH = 80;
+
 @component
 export class HoloSpecDualFrameClient extends BaseScriptComponent {
   @input
@@ -84,8 +103,9 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
   private rgbMaterial: Material | null = null;
   private depthMaterial: Material | null = null;
 
-  private pendingFrame: HoloSpecFrameMessage | null = null;
+  private pendingFrame: HoloSpecFrameMessage | HoloSpecBinaryFrame | null = null;
   private isDecodingColor: boolean = false;
+  private binaryMessageSequence: number = 0;
 
   private depthTexture: Texture | null = null;
   private depthTextureProvider: ProceduralTextureProvider | null = null;
@@ -156,6 +176,7 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
 
     try {
       this.socket = internetModule.createWebSocket(this.serverUrl);
+      this.socket.binaryType = "blob";
     } catch (error) {
       this.isConnecting = false;
       this.connectionStatus = "Socket create failed";
@@ -262,6 +283,7 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
 
   private handleMessage(event: WebSocketMessageEvent): void {
     if (typeof event.data !== "string") {
+      this.handleBinaryMessage(event.data as Blob);
       return;
     }
 
@@ -294,22 +316,71 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
     }
   }
 
-  private renderFrame(frame: HoloSpecFrameMessage): void {
-    if (!frame.color || !frame.depth || !this.rgbMaterial || !this.depthMaterial) {
+  private handleBinaryMessage(blob: Blob): void {
+    const sequence = ++this.binaryMessageSequence;
+
+    blob.bytes()
+      .then((bytes: Uint8Array) => {
+        if (sequence !== this.binaryMessageSequence) {
+          return;
+        }
+
+        const frame = this.parseBinaryFrame(bytes);
+        if (!frame) {
+          return;
+        }
+
+        this.pendingFrame = frame;
+      })
+      .catch((error: string) => {
+        print("HoloSpecDualFrameClient: failed to read binary frame: " + error);
+      });
+  }
+
+  private renderFrame(frame: HoloSpecFrameMessage | HoloSpecBinaryFrame): void {
+    if (!this.rgbMaterial || !this.depthMaterial) {
       return;
     }
 
     this.frameCount += 1;
-    this.streamId = frame.streamId || "default";
-    this.lastTimestamp = frame.timestamp || 0;
+    this.streamId = this.isBinaryFrame(frame)
+      ? frame.streamId
+      : frame.streamId || "default";
+    this.lastTimestamp = this.isBinaryFrame(frame)
+      ? frame.timestamp
+      : frame.timestamp || 0;
     this.connectionStatus = "Streaming";
 
-    this.applyAspectRatio(this.rgbWindow, frame.color.width, frame.color.height);
-    this.applyAspectRatio(this.depthWindow, frame.depth.width, frame.depth.height);
-    this.updateDepthTexture(frame.depth);
-
     this.isDecodingColor = true;
-    const colorBase64 = frame.color.data;
+    let colorBase64: string;
+
+    if (this.isBinaryFrame(frame)) {
+      this.applyAspectRatio(this.rgbWindow, frame.colorWidth, frame.colorHeight);
+      this.applyAspectRatio(this.depthWindow, frame.depthWidth, frame.depthHeight);
+      this.updateDepthTexture(
+        frame.depthWidth,
+        frame.depthHeight,
+        frame.depthBytesPerRow,
+        frame.depthBytes,
+      );
+      colorBase64 = Base64.encode(frame.colorBytes);
+    } else {
+      if (!frame.color || !frame.depth) {
+        this.isDecodingColor = false;
+        return;
+      }
+
+      this.applyAspectRatio(this.rgbWindow, frame.color.width, frame.color.height);
+      this.applyAspectRatio(this.depthWindow, frame.depth.width, frame.depth.height);
+      this.updateDepthTexture(
+        frame.depth.width,
+        frame.depth.height,
+        frame.depth.bytesPerRow,
+        Base64.decode(frame.depth.data),
+      );
+      colorBase64 = frame.color.data;
+    }
+
     Base64.decodeTextureAsync(
       colorBase64,
       (decodedTexture: Texture) => {
@@ -328,7 +399,12 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
     );
   }
 
-  private updateDepthTexture(depth: HoloSpecDepthPayload): void {
+  private updateDepthTexture(
+    width: number,
+    height: number,
+    bytesPerRow: number,
+    depthBytes: Uint8Array,
+  ): void {
     if (!this.depthMaterial) {
       return;
     }
@@ -336,35 +412,34 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
     if (
       !this.depthTexture ||
       !this.depthTextureProvider ||
-      this.depthTextureWidth !== depth.width ||
-      this.depthTextureHeight !== depth.height
+      this.depthTextureWidth !== width ||
+      this.depthTextureHeight !== height
     ) {
       this.depthTexture = ProceduralTextureProvider.createWithFormat(
-        depth.width,
-        depth.height,
+        width,
+        height,
         TextureFormat.RGBA8Unorm,
       );
       this.depthTextureProvider = this.depthTexture
         .control as ProceduralTextureProvider;
-      this.depthTextureWidth = depth.width;
-      this.depthTextureHeight = depth.height;
+      this.depthTextureWidth = width;
+      this.depthTextureHeight = height;
       this.depthMaterial.mainPass.baseTex = this.depthTexture;
     }
 
-    const depthBytes = Base64.decode(depth.data);
     const view = new DataView(
       depthBytes.buffer,
       depthBytes.byteOffset,
       depthBytes.byteLength,
     );
-    const rgbaPixels = new Uint8Array(depth.width * depth.height * 4);
+    const rgbaPixels = new Uint8Array(width * height * 4);
     const range = Math.max(this.depthFarMeters - this.depthNearMeters, 0.0001);
 
-    for (let y = 0; y < depth.height; y += 1) {
-      for (let x = 0; x < depth.width; x += 1) {
-        const sourceOffset = y * depth.bytesPerRow + x * 4;
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const sourceOffset = y * bytesPerRow + x * 4;
         const depthValue = view.getFloat32(sourceOffset, true);
-        const targetIndex = ((depth.height - 1 - y) * depth.width + x) * 4;
+        const targetIndex = ((height - 1 - y) * width + x) * 4;
 
         if (
           !isFinite(depthValue) ||
@@ -391,7 +466,7 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
       }
     }
 
-    this.depthTextureProvider.setPixels(0, 0, depth.width, depth.height, rgbaPixels);
+    this.depthTextureProvider.setPixels(0, 0, width, height, rgbaPixels);
   }
 
   private turboColor(normalized: number): number[] {
@@ -464,18 +539,18 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
     this.reconnectEvent.reset(Math.max(this.reconnectDelaySeconds, 0.25));
   }
 
-  private refreshStatusText(frame?: HoloSpecFrameMessage): void {
+  private refreshStatusText(frame?: HoloSpecFrameMessage | HoloSpecBinaryFrame): void {
     const rgbLines = [
       "RGB",
       this.connectionStatus,
       this.streamId,
-      this.formatFrameInfo(frame?.color),
+      this.formatFrameInfo(frame, false),
     ];
     const depthLines = [
       "Depth",
       this.connectionStatus,
       this.streamId,
-      this.formatFrameInfo(frame?.depth),
+      this.formatFrameInfo(frame, true),
     ];
 
     if (this.rgbStatusText) {
@@ -488,17 +563,113 @@ export class HoloSpecDualFrameClient extends BaseScriptComponent {
   }
 
   private formatFrameInfo(
-    payload: HoloSpecColorPayload | HoloSpecDepthPayload | undefined,
+    frame: HoloSpecFrameMessage | HoloSpecBinaryFrame | undefined,
+    useDepthDimensions: boolean,
   ): string {
-    if (!payload) {
+    if (!frame) {
       return this.frameCount > 0 ? "frame " + this.frameCount : "waiting";
     }
 
-    let suffix = payload.width + "x" + payload.height;
+    let width = 0;
+    let height = 0;
+
+    if (this.isBinaryFrame(frame)) {
+      width = useDepthDimensions ? frame.depthWidth : frame.colorWidth;
+      height = useDepthDimensions ? frame.depthHeight : frame.colorHeight;
+    } else {
+      const payload = useDepthDimensions ? frame.depth : frame.color;
+      if (!payload) {
+        return this.frameCount > 0 ? "frame " + this.frameCount : "waiting";
+      }
+      width = payload.width;
+      height = payload.height;
+    }
+
+    let suffix = width + "x" + height;
     if (this.lastTimestamp > 0) {
       suffix += " @" + Math.round(this.lastTimestamp);
     }
     return suffix;
+  }
+
+  private isBinaryFrame(
+    frame: HoloSpecFrameMessage | HoloSpecBinaryFrame,
+  ): frame is HoloSpecBinaryFrame {
+    return (frame as HoloSpecBinaryFrame).colorBytes !== undefined;
+  }
+
+  private parseBinaryFrame(bytes: Uint8Array): HoloSpecBinaryFrame | null {
+    if (bytes.byteLength < FIXED_HEADER_LENGTH) {
+      return null;
+    }
+
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const magic = this.bytesToString(bytes.subarray(0, 4));
+    if (magic !== FRAME_MAGIC) {
+      return null;
+    }
+
+    const version = view.getUint8(4);
+    const messageType = view.getUint8(5);
+    const headerLength = view.getUint16(6, true);
+    const timestamp = view.getFloat64(8, true);
+    const colorWidth = view.getUint16(16, true);
+    const colorHeight = view.getUint16(18, true);
+    const depthWidth = view.getUint16(20, true);
+    const depthHeight = view.getUint16(22, true);
+    const depthBytesPerRow = view.getUint32(24, true);
+    const colorLength = view.getUint32(28, true);
+    const depthLength = view.getUint32(32, true);
+    const streamIdLength = view.getUint16(36, true);
+    const referenceWidth = view.getUint16(38, true);
+    const referenceHeight = view.getUint16(40, true);
+    const flags = view.getUint16(42, true);
+    const intrinsics = new Float32Array(9);
+
+    if (version !== 1 || messageType !== 1 || headerLength !== FIXED_HEADER_LENGTH + streamIdLength) {
+      return null;
+    }
+
+    if (bytes.byteLength !== headerLength + colorLength + depthLength) {
+      return null;
+    }
+
+    for (let index = 0; index < 9; index += 1) {
+      intrinsics[index] = view.getFloat32(44 + index * 4, true);
+    }
+
+    const streamId = this.bytesToString(
+      bytes.subarray(FIXED_HEADER_LENGTH, headerLength),
+    ) || "default";
+    const colorBytes = bytes.slice(headerLength, headerLength + colorLength);
+    const depthBytes = bytes.slice(
+      headerLength + colorLength,
+      headerLength + colorLength + depthLength,
+    );
+
+    return {
+      streamId,
+      timestamp,
+      colorWidth,
+      colorHeight,
+      depthWidth,
+      depthHeight,
+      depthBytesPerRow,
+      colorBytes,
+      depthBytes,
+      intrinsics,
+      referenceWidth,
+      referenceHeight,
+      isFiltered: (flags & 1) === 1,
+    };
+  }
+
+  private bytesToString(bytes: Uint8Array): string {
+    let result = "";
+    for (let index = 0; index < bytes.length; index += 1) {
+      result += String.fromCharCode(bytes[index]);
+    }
+    return result;
   }
 
   private clamp(value: number, min: number, max: number): number {

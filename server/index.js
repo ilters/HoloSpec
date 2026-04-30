@@ -30,6 +30,9 @@ const socketsByRole = {
 };
 
 const latestFrames = new Map();
+const BINARY_MAGIC = "HSF1";
+const FRAME_MESSAGE_TYPE = 1;
+const FIXED_HEADER_LENGTH = 80;
 
 function safeSend(socket, payload) {
   if (socket.readyState === WebSocket.OPEN) {
@@ -56,7 +59,41 @@ function unregisterSocket(socket) {
   }
 }
 
-function handleMessage(socket, rawMessage) {
+function parseBinaryFrameHeader(buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < FIXED_HEADER_LENGTH) {
+    return null;
+  }
+
+  if (buffer.toString("ascii", 0, 4) !== BINARY_MAGIC) {
+    return null;
+  }
+
+  const version = buffer.readUInt8(4);
+  const messageType = buffer.readUInt8(5);
+  const headerLength = buffer.readUInt16LE(6);
+  const streamIdLength = buffer.readUInt16LE(36);
+
+  if (version !== 1 || messageType !== FRAME_MESSAGE_TYPE) {
+    return null;
+  }
+
+  if (headerLength !== FIXED_HEADER_LENGTH + streamIdLength) {
+    return null;
+  }
+
+  const colorLength = buffer.readUInt32LE(28);
+  const depthLength = buffer.readUInt32LE(32);
+  const totalLength = headerLength + colorLength + depthLength;
+
+  if (buffer.length !== totalLength) {
+    return null;
+  }
+
+  const streamId = buffer.toString("utf8", FIXED_HEADER_LENGTH, headerLength) || "default";
+  return { streamId };
+}
+
+function handleTextMessage(socket, rawMessage) {
   let message;
   try {
     message = JSON.parse(rawMessage.toString());
@@ -128,6 +165,34 @@ function handleMessage(socket, rawMessage) {
   broadcastToSubscribers(serialized);
 }
 
+function handleBinaryMessage(socket, rawMessage) {
+  if (socket.role !== "publisher") {
+    safeSend(
+      socket,
+      JSON.stringify({
+        type: "error",
+        message: "Only publisher clients can send frame payloads."
+      })
+    );
+    return;
+  }
+
+  const frameHeader = parseBinaryFrameHeader(rawMessage);
+  if (!frameHeader) {
+    safeSend(
+      socket,
+      JSON.stringify({
+        type: "error",
+        message: "Unsupported binary frame payload."
+      })
+    );
+    return;
+  }
+
+  latestFrames.set(frameHeader.streamId, Buffer.from(rawMessage));
+  broadcastToSubscribers(rawMessage);
+}
+
 wss.on("connection", (socket, request) => {
   const requestUrl = new URL(request.url, `http://${request.headers.host}`);
   registerSocket(socket, requestUrl.searchParams.get("role") || "subscriber");
@@ -141,7 +206,14 @@ wss.on("connection", (socket, request) => {
     })
   );
 
-  socket.on("message", (message) => handleMessage(socket, message));
+  socket.on("message", (message, isBinary) => {
+    if (isBinary) {
+      handleBinaryMessage(socket, Buffer.from(message));
+      return;
+    }
+
+    handleTextMessage(socket, message);
+  });
   socket.on("close", () => unregisterSocket(socket));
   socket.on("error", () => unregisterSocket(socket));
 });
@@ -149,4 +221,3 @@ wss.on("connection", (socket, request) => {
 server.listen(PORT, () => {
   console.log(`HoloSpec relay listening on http://0.0.0.0:${PORT}`);
 });
-
