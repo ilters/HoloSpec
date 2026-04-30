@@ -148,6 +148,9 @@
       const colorFrameEl = document.getElementById("color-frame");
       const depthCanvas = document.getElementById("depth-canvas");
       const depthContext = depthCanvas.getContext("2d");
+      const DEPTH_PREVIEW_NEAR_METERS = 0.2;
+      const DEPTH_PREVIEW_FAR_METERS = 1.2;
+      const MAX_REASONABLE_DEPTH_METERS = 2.0;
 
       function base64ToArrayBuffer(base64) {
         const binary = atob(base64);
@@ -158,39 +161,71 @@
         return bytes.buffer;
       }
 
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function turboColor(normalized) {
+        const x = clamp(normalized, 0, 1);
+        const red = 34.61 + x * (1172.33 + x * (-10793.56 + x * (33300.12 + x * (-38394.49 + x * 14825.05))));
+        const green = 23.31 + x * (557.33 + x * (1225.33 + x * (-3574.96 + x * (2036.17 + x * -376.04))));
+        const blue = 27.2 + x * (3211.1 + x * (-15327.97 + x * (27814.0 + x * (-22569.18 + x * 6838.66))));
+
+        return [
+          Math.round(clamp(red, 0, 255)),
+          Math.round(clamp(green, 0, 255)),
+          Math.round(clamp(blue, 0, 255))
+        ];
+      }
+
       function renderDepthFrame(depth) {
         const bytes = new Uint8Array(base64ToArrayBuffer(depth.data));
         const view = new DataView(bytes.buffer);
         const imageData = new ImageData(depth.width, depth.height);
-
         let min = Number.POSITIVE_INFINITY;
         let max = 0;
+        let validPixels = 0;
+        const totalPixels = depth.width * depth.height;
 
         for (let y = 0; y < depth.height; y += 1) {
           for (let x = 0; x < depth.width; x += 1) {
             const offset = y * depth.bytesPerRow + x * 4;
             const value = view.getFloat32(offset, true);
-            if (Number.isFinite(value) && value > 0) {
+            if (Number.isFinite(value) && value > 0 && value < MAX_REASONABLE_DEPTH_METERS) {
               min = Math.min(min, value);
               max = Math.max(max, value);
+              validPixels += 1;
             }
           }
         }
-
-        const range = Math.max(max - min, 0.0001);
+        const validRatio = validPixels / totalPixels;
+        const displayRange = DEPTH_PREVIEW_FAR_METERS - DEPTH_PREVIEW_NEAR_METERS;
 
         for (let y = 0; y < depth.height; y += 1) {
           for (let x = 0; x < depth.width; x += 1) {
             const sourceOffset = y * depth.bytesPerRow + x * 4;
             const pixelIndex = y * depth.width + x;
             const value = view.getFloat32(sourceOffset, true);
-            const normalized = !Number.isFinite(value) || value <= 0
-              ? 0
-              : Math.round(((value - min) / range) * 255);
+            const invalid = !Number.isFinite(value) || value <= 0 || value >= MAX_REASONABLE_DEPTH_METERS;
 
-            imageData.data[pixelIndex * 4 + 0] = normalized;
-            imageData.data[pixelIndex * 4 + 1] = normalized;
-            imageData.data[pixelIndex * 4 + 2] = normalized;
+            if (invalid) {
+              imageData.data[pixelIndex * 4 + 0] = 8;
+              imageData.data[pixelIndex * 4 + 1] = 10;
+              imageData.data[pixelIndex * 4 + 2] = 18;
+              imageData.data[pixelIndex * 4 + 3] = 255;
+              continue;
+            }
+
+            const normalized = 1 - clamp(
+              (value - DEPTH_PREVIEW_NEAR_METERS) / Math.max(displayRange, 0.0001),
+              0,
+              1
+            );
+            const [red, green, blue] = turboColor(normalized);
+
+            imageData.data[pixelIndex * 4 + 0] = red;
+            imageData.data[pixelIndex * 4 + 1] = green;
+            imageData.data[pixelIndex * 4 + 2] = blue;
             imageData.data[pixelIndex * 4 + 3] = 255;
           }
         }
@@ -198,6 +233,12 @@
         depthCanvas.width = depth.width;
         depthCanvas.height = depth.height;
         depthContext.putImageData(imageData, 0, 0);
+
+        return {
+          validRatio,
+          minDepth: Number.isFinite(min) ? min : null,
+          maxDepth: max > 0 ? max : null
+        };
       }
 
       const wsProtocol = location.protocol === "https:" ? "wss" : "ws";
@@ -224,9 +265,14 @@
         streamIdEl.textContent = message.streamId;
         timestampEl.textContent = new Date(message.timestamp * 1000).toLocaleString();
         colorSizeEl.textContent = `${message.color.width} x ${message.color.height}`;
-        depthSizeEl.textContent = `${message.depth.width} x ${message.depth.height}`;
+        const depthStats = renderDepthFrame(message.depth);
+        const depthSummary = depthStats.minDepth === null
+          ? "no valid depth"
+          : `${depthStats.minDepth.toFixed(2)}-${depthStats.maxDepth.toFixed(2)}m`;
+
+        depthSizeEl.textContent =
+          `${message.depth.width} x ${message.depth.height} • valid ${(depthStats.validRatio * 100).toFixed(1)}% • ${depthSummary}`;
         colorFrameEl.src = `data:image/jpeg;base64,${message.color.data}`;
-        renderDepthFrame(message.depth);
       });
     </script>
   </body>
