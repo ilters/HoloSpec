@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HoloSpec Viewer</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #09111a;
+        --panel: rgba(17, 28, 41, 0.86);
+        --line: rgba(148, 163, 184, 0.24);
+        --text: #e2e8f0;
+        --muted: #93a4b8;
+        --accent: #5eead4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "SF Pro Display", "Avenir Next", sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(94, 234, 212, 0.18), transparent 32%),
+          linear-gradient(180deg, #09111a 0%, #05080d 100%);
+        color: var(--text);
+      }
+
+      main {
+        width: min(1100px, calc(100vw - 32px));
+        margin: 32px auto;
+        display: grid;
+        gap: 16px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 20px;
+        backdrop-filter: blur(18px);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
+      }
+
+      .hero {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: end;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        letter-spacing: -0.04em;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+
+      canvas,
+      img {
+        width: 100%;
+        border-radius: 16px;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.14);
+      }
+
+      dl {
+        margin: 0;
+        display: grid;
+        gap: 8px;
+      }
+
+      dt {
+        color: var(--muted);
+      }
+
+      dd {
+        margin: 0;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="panel hero">
+        <div>
+          <p class="muted">WebSocket subscriber</p>
+          <h1>HoloSpec Relay Viewer</h1>
+        </div>
+        <div>
+          <p id="status">Connecting...</p>
+          <p class="muted" id="stream-meta">Waiting for frames</p>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <h2>Color</h2>
+          <p class="muted">JPEG stream from the iOS publisher</p>
+          <img id="color-frame" alt="Latest color frame" />
+        </article>
+
+        <article class="panel">
+          <h2>Depth</h2>
+          <p class="muted">Float32 depth map normalized for preview</p>
+          <canvas id="depth-canvas"></canvas>
+        </article>
+      </section>
+
+      <section class="panel">
+        <dl>
+          <dt>Latest stream</dt>
+          <dd id="stream-id">None</dd>
+          <dt>Frame timestamp</dt>
+          <dd id="timestamp">-</dd>
+          <dt>Color size</dt>
+          <dd id="color-size">-</dd>
+          <dt>Depth size</dt>
+          <dd id="depth-size">-</dd>
+        </dl>
+      </section>
+    </main>
+
+    <script>
+      const statusEl = document.getElementById("status");
+      const streamMetaEl = document.getElementById("stream-meta");
+      const streamIdEl = document.getElementById("stream-id");
+      const timestampEl = document.getElementById("timestamp");
+      const colorSizeEl = document.getElementById("color-size");
+      const depthSizeEl = document.getElementById("depth-size");
+      const colorFrameEl = document.getElementById("color-frame");
+      const depthCanvas = document.getElementById("depth-canvas");
+      const depthContext = depthCanvas.getContext("2d");
+
+      function base64ToArrayBuffer(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let index = 0; index < binary.length; index += 1) {
+          bytes[index] = binary.charCodeAt(index);
+        }
+        return bytes.buffer;
+      }
+
+      function renderDepthFrame(depth) {
+        const bytes = new Uint8Array(base64ToArrayBuffer(depth.data));
+        const view = new DataView(bytes.buffer);
+        const imageData = new ImageData(depth.width, depth.height);
+
+        let min = Number.POSITIVE_INFINITY;
+        let max = 0;
+
+        for (let y = 0; y < depth.height; y += 1) {
+          for (let x = 0; x < depth.width; x += 1) {
+            const offset = y * depth.bytesPerRow + x * 4;
+            const value = view.getFloat32(offset, true);
+            if (Number.isFinite(value) && value > 0) {
+              min = Math.min(min, value);
+              max = Math.max(max, value);
+            }
+          }
+        }
+
+        const range = Math.max(max - min, 0.0001);
+
+        for (let y = 0; y < depth.height; y += 1) {
+          for (let x = 0; x < depth.width; x += 1) {
+            const sourceOffset = y * depth.bytesPerRow + x * 4;
+            const pixelIndex = y * depth.width + x;
+            const value = view.getFloat32(sourceOffset, true);
+            const normalized = !Number.isFinite(value) || value <= 0
+              ? 0
+              : Math.round(((value - min) / range) * 255);
+
+            imageData.data[pixelIndex * 4 + 0] = normalized;
+            imageData.data[pixelIndex * 4 + 1] = normalized;
+            imageData.data[pixelIndex * 4 + 2] = normalized;
+            imageData.data[pixelIndex * 4 + 3] = 255;
+          }
+        }
+
+        depthCanvas.width = depth.width;
+        depthCanvas.height = depth.height;
+        depthContext.putImageData(imageData, 0, 0);
+      }
+
+      const wsProtocol = location.protocol === "https:" ? "wss" : "ws";
+      const socket = new WebSocket(`${wsProtocol}://${location.host}/ws?role=subscriber`);
+
+      socket.addEventListener("open", () => {
+        statusEl.textContent = "Connected";
+        socket.send(JSON.stringify({ type: "hello", role: "subscriber" }));
+      });
+
+      socket.addEventListener("close", () => {
+        statusEl.textContent = "Disconnected";
+      });
+
+      socket.addEventListener("message", ({ data }) => {
+        const message = JSON.parse(data);
+        if (message.type !== "frame") {
+          return;
+        }
+
+        streamMetaEl.textContent = `Server receive: ${new Date(
+          message.serverReceivedAt
+        ).toLocaleTimeString()}`;
+        streamIdEl.textContent = message.streamId;
+        timestampEl.textContent = new Date(message.timestamp * 1000).toLocaleString();
+        colorSizeEl.textContent = `${message.color.width} x ${message.color.height}`;
+        depthSizeEl.textContent = `${message.depth.width} x ${message.depth.height}`;
+        colorFrameEl.src = `data:image/jpeg;base64,${message.color.data}`;
+        renderDepthFrame(message.depth);
+      });
+    </script>
+  </body>
+</html>
