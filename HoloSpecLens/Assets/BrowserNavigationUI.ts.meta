@@ -1,0 +1,60 @@
+- !<AssetImportMetadata/d9be6e01-8f8e-48ee-9ce9-b819e48075be>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> c68b93bb-6e0f-455e-ada2-8dddc82e2127
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> c68b93bb-6e0f-455e-ada2-8dddc82e2127
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> e042237a-013d-40bc-b7b3-09f0805c4a3a
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/e042237a-013d-40bc-b7b3-09f0805c4a3a>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: f136a694-62af-41f0-ab78-643728bd2525
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    backButton: false
+    browserClient: false
+    forwardButton: false
+    goButton: false
+    keyboardToggleButton: false
+    urlTextField: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - browserClient: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      backButton: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      forwardButton: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
+      urlTextField: !<MappingBased.AssignableType_4> 00000000-0000-0000-0000-000000000000
+      goButton: !<MappingBased.AssignableType_5> 00000000-0000-0000-0000-000000000000
+      keyboardToggleButton: !<MappingBased.AssignableType_6> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input AssignableType_1 browserClient {"label":"Remote Browser Client", "hint":"The RemoteBrowserClient component to control"}'
+    - '// @input AssignableType_2 backButton {"label":"Back Button", "hint":"Optional: Assign the RectangleButton component (UIKit) for browser back navigation"}'
+    - '// @input AssignableType_3 forwardButton {"label":"Forward Button", "hint":"Optional: Assign the RectangleButton component (UIKit) for browser forward navigation"}'
+    - '// @input AssignableType_4 urlTextField {"label":"URL Text Field", "hint":"Optional: TextInputField component for URL input and display"}'
+    - '// @input AssignableType_5 goButton {"label":"Go Button", "hint":"Optional: Assign the RectangleButton component (UIKit) to navigate to URL"}'
+    - '// @input AssignableType_6 keyboardToggleButton {"label":"Keyboard Toggle Button", "hint":"Optional: Assign the RectangleButton component (UIKit) that toggles the keyboard on/off"}'

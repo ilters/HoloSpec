@@ -1,0 +1,57 @@
+- !<AssetImportMetadata/5e84aad8-8503-4144-9679-f9790e25acba>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> ee8cc8ae-e1d3-4681-8ccb-deef9bb79416
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> ee8cc8ae-e1d3-4681-8ccb-deef9bb79416
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 2d764ce3-d10d-4990-a752-dcaa2dcb72c0
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/2d764ce3-d10d-4990-a752-dcaa2dcb72c0>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: d88a0c15-a2df-4e5d-a435-2e480d2669c8
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    activationDelay: false
+    browserClient: false
+    browserWindow: false
+    movementThreshold: false
+    touchpadInteractor: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - browserClient: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      touchpadInteractor: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      browserWindow: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      activationDelay: 0.150000
+      movementThreshold: !<float> 2.000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input AssignableType_1 browserClient {"label":"Browser Client", "hint":"The RemoteBrowserClient to send scroll events to"}'
+    - '// @input AssignableType_2 touchpadInteractor {"label":"Touchpad Interactor", "hint":"Optional: Wire up touchpad interactor for two-finger swipe scrolling"}'
+    - '// @input SceneObject browserWindow {"label":"Browser Window Object", "hint":"The SceneObject that displays the browser. If targeting this or its children, universal scrolling will be disabled to allow for mouse interaction."}'
+    - '// @input float activationDelay = 0.15 {"label":"Activation Delay", "hint":"How long to hold pinch before scroll mode activates (seconds)"}'
+    - '// @input float movementThreshold = 2 {"label":"Movement Threshold", "hint":"Maximum hand movement allowed during activation delay (cm)"}'

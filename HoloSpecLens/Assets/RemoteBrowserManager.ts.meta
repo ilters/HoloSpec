@@ -1,0 +1,60 @@
+- !<AssetImportMetadata/e158ec52-7b76-42e3-96de-3ec52ea74ae8>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 406ba074-9c54-4b1c-bef5-6eefb7ca52b6
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 406ba074-9c54-4b1c-bef5-6eefb7ca52b6
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> c797e6cd-7cc7-4a99-8abf-2e023765da05
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/c797e6cd-7cc7-4a99-8abf-2e023765da05>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: a00e862b-a9be-49aa-a726-55a96340e473
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    browserMaterial: false
+    browserWindow: false
+    errorText: false
+    inputController: false
+    serverSelection: false
+    statsText: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - browserMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      statsText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      inputController: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      browserWindow: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      errorText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      serverSelection: railway
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Asset.Material browserMaterial
+    - // @input Component.Text statsText
+    - '// @input AssignableType_1 inputController {"label":"Browser Input Controller", "hint":"The BrowserInputController component that handles mouse/hand input"}'
+    - '// @input SceneObject browserWindow {"label":"Browser Window Object", "hint":"The SceneObject that displays the browser (for scaling based on aspect ratio)"}'
+    - '// @input Component.Text errorText {"label":"Error Text", "hint":"Optional: Text component to display connection error messages"}'
+    - '// @input string serverSelection = "railway" {"label":"Server Selection", "hint":"Choose which server to connect to", "widget":"combobox", "values":[{"label":"Railway (Production)", "value":"railway"}, {"label":"Railway Gen UI", "value":"railway-gen-ui"}, {"label":"Ngrok (Testing)", "value":"ngrok"}, {"label":"Render (Backup)", "value":"render"}, {"label":"Local (Development)", "value":"local"}]}'

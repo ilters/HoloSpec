@@ -1,0 +1,61 @@
+- !<AssetImportMetadata/1343a930-4d29-3473-1216-84c350599e95>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 2a88f50c-69bb-479b-9258-e3b43833d194
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 2a88f50c-69bb-479b-9258-e3b43833d194
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 81bd8050-1d7e-45f1-88d5-a1346f3441c7
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/81bd8050-1d7e-45f1-88d5-a1346f3441c7>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: bf49c418-c7db-45ce-a8b4-26db1c2957d0
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    _allowAllTogglesOff: false
+    _toggles: false
+    addCallbacks: false
+    onToggleSelectedCallbacks: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - _allowAllTogglesOff: false
+      addCallbacks: false
+      onToggleSelectedCallbacks:
+        []
+      _toggles: !<MappingBased.AssignableType_1[]>
+        []
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input bool _allowAllTogglesOff {"hint":"Is it allowed that no toggle is switched on?"}'
+    - "// @input bool addCallbacks {\"hint\":\"Enable this to add functions from another script to this component's callbacks\"}"
+    - /*
+    - "@typedef Callback"
+    - "@property {Component.ScriptComponent} scriptComponent"
+    - "@property {string} functionName"
+    - "*/"
+    - '// @input Callback[] onToggleSelectedCallbacks = {} {"label":"On Toggle Selected Callbacks", "showIf":"addCallbacks"}'
+    - "// @input AssignableType_1[] _toggles = {}"

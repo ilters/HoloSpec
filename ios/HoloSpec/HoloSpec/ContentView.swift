@@ -20,13 +20,15 @@ struct ContentView: View {
                     Text("Relay URL")
                         .font(.headline)
 
-                    TextField("ws://192.168.1.10:8080/ws?role=publisher", text: $streamService.endpoint)
+                    TextField("wss://holo-speccc.up.railway.app/ws?role=publisher", text: $streamService.endpoint)
                         .textInputAutocapitalization(.never)
                         .disableAutocorrection(true)
                         .textFieldStyle(.roundedBorder)
 
                     LabeledContent("Status", value: streamService.connectionStatus)
                     LabeledContent("Device", value: streamService.captureDeviceLabel)
+                    LabeledContent("RGB", value: streamService.colorResolutionLabel)
+                    LabeledContent("Depth", value: streamService.depthResolutionLabel)
                     Text(streamService.statusMessage)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -82,4 +84,3 @@ private final class PreviewView: UIView {
 #Preview {
     ContentView()
 }
-

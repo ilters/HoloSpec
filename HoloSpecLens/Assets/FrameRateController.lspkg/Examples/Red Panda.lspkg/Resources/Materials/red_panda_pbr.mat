@@ -1,0 +1,87 @@
+- !<Material/8f316b40-161f-4329-a2af-caf867916fe6>
+  PackagePath: ""
+  PassesInfo:
+    - !<own> 1e1e78bd-2bb4-43ee-b55d-c45136938d58
+- !<PassInfo/1e1e78bd-2bb4-43ee-b55d-c45136938d58>
+  CachedProperties:
+    []
+  DepthWrite: true
+  DepthTest: true
+  DepthFunction: LessEqual
+  TwoSided: false
+  ColorMask: {x: true, y: true, z: true, w: true}
+  CullMode: Back
+  PolygonOffset: {x: 0.000000, y: 0.000000}
+  FrustumCulling: Auto
+  FrustumCullPad: 0.000000
+  InstanceCount: 1
+  Defines:
+    - NODE_13_DROPLIST_ITEM 0
+    - NODE_181_DROPLIST_ITEM 0
+    - NODE_184_DROPLIST_ITEM 0
+    - NODE_221_DROPLIST_ITEM 0
+    - NODE_228_DROPLIST_ITEM 0
+    - NODE_27_DROPLIST_ITEM 0
+    - NODE_315_DROPLIST_ITEM 0
+    - NODE_38_DROPLIST_ITEM 0
+    - NODE_49_DROPLIST_ITEM 0
+    - NODE_69_DROPLIST_ITEM 0
+    - NODE_76_DROPLIST_ITEM 0
+    - ENABLE_BASE_TEX
+  BlendMode: Disabled
+  Properties:
+    PreviewEnabled:
+      typeIdx: 0
+      value: 0
+    baseColor:
+      typeIdx: 5
+      value: {x: 1.000000, y: 0.999969, z: 0.999985, w: 1.000000}
+    baseTex:
+      typeIdx: 9
+      value:
+        id: 54ab2fb3-068d-4104-83ae-e8f046afad16
+        sampler:
+          filteringMode: Trilinear
+          wrapModeU: Repeat
+          wrapModeV: Repeat
+          wrapModeW: Repeat
+          borderColor: {x: 0.000000, y: 0.000000, z: 0.000000, w: 0.000000}
+          mipmaps: false
+        type: Texture2D
+    baseTexTransform:
+      typeIdx: 7
+      value:
+        0: {x: 1.000000, y: 0.000000, z: 0.000000}
+        1: {x: 0.000000, y: 1.000000, z: 0.000000}
+        2: {x: 0.000000, y: 0.000000, z: 1.000000}
+    materialParamsTex:
+      typeIdx: 9
+      value:
+        id: c520e07e-8a01-4e45-a5df-df5ae28a6f20
+        sampler:
+          filteringMode: Trilinear
+          wrapModeU: Repeat
+          wrapModeV: Repeat
+          wrapModeW: ClampToEdge
+          borderColor: {x: 0.000000, y: 0.000000, z: 0.000000, w: 0.000000}
+          mipmaps: true
+        type: Texture2D
+    materialParamsTexTransform:
+      typeIdx: 7
+      value:
+        0: {x: 1.000000, y: 0.000000, z: 0.000000}
+        1: {x: 0.000000, y: 1.000000, z: 0.000000}
+        2: {x: 0.000000, y: 0.000000, z: 1.000000}
+    uv2Offset:
+      typeIdx: 3
+      value: {x: 1.000000, y: 1.000000}
+    uv2Scale:
+      typeIdx: 3
+      value: {x: 1.000000, y: 1.000000}
+    uv3Offset:
+      typeIdx: 3
+      value: {x: 1.000000, y: 1.000000}
+    uv3Scale:
+      typeIdx: 3
+      value: {x: 1.000000, y: 1.000000}
+  Pass: !<reference> c7439c65-a02d-4a06-904b-0f8e0a594c6f

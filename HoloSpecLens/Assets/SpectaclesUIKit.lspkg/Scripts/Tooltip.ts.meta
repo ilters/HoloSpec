@@ -1,0 +1,48 @@
+- !<AssetImportMetadata/8506fad7-d717-87c5-d857-625db5ab33a8>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> ba2c98a7-81dc-4811-881f-aca325904332
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> ba2c98a7-81dc-4811-881f-aca325904332
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 9ef0719c-fb4b-4208-957d-c2dff7a4e1a4
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/9ef0719c-fb4b-4208-957d-c2dff7a4e1a4>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: ea36e865-121d-4d88-801f-811a68d8f48f
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    _renderOrder: false
+    _tip: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - _renderOrder: 0
+      _tip: Helpful Hint
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input int _renderOrder = 1000
+    - '// @input string _tip = "Helpful Hint"'

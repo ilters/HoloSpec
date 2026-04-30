@@ -1,0 +1,116 @@
+- !<AssetImportMetadata/adb7ed7f-80c7-537d-30ad-68bf9e8edcdf>
+  ImportedAssetIds:
+    ObjectPrefab: !<reference> 96fa6341-dcee-40fe-bb4e-8ddfcd02d409
+  ImporterName: ObjectPrefabImporter
+  PrimaryAsset: !<reference> 96fa6341-dcee-40fe-bb4e-8ddfcd02d409
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    ObjectPrefab: !<own> 66073ab0-ccc4-4bfa-a538-ea1a529c24ff
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<ScriptComponent/4a894bfd-a768-4c87-84e7-b911d4eea7a4>
+  PrefabRemaps:
+    []
+  Name: RectangleButton
+  Enabled: true
+  ScriptAsset: !<reference> 22f31674-9dd1-4847-a7a1-042b7f3772a7
+  ScriptInputsDefault:
+    _renderOrder: true
+    _size: true
+    _inactive: true
+    _playAudio: true
+    _style: true
+    _hasShadow: true
+    _shadowPositionOffset: true
+    _toggleable: true
+    _defaultToOn: true
+    addCallbacks: true
+    triggerUpCallbacks: true
+    triggerDownCallbacks: true
+    onValueChangeCallbacks: true
+    onFinishedCallbacks: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      _renderOrder: 0
+      _size: !<Vec3> {x: 6.000000, y: 3.000000, z: 3.000000}
+      _inactive: false
+      _playAudio: false
+      _style: PrimaryNeutral
+      _hasShadow: false
+      _shadowPositionOffset: !<Vec3> {x: 0.050000, y: -0.050000, z: -0.010000}
+      _toggleable: false
+      _defaultToOn: false
+      addCallbacks: false
+      triggerUpCallbacks:
+        []
+      triggerDownCallbacks:
+        []
+      onValueChangeCallbacks:
+        []
+      onFinishedCallbacks:
+        []
+  ScriptTypes:
+    "":
+      {}
+- !<Image/5ac65a47-9849-4598-a736-93c5252f95a4>
+  PrefabRemaps:
+    []
+  Name: Image
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Fit
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 6445f02e-40a6-4c86-8f6d-209b8e2cdba0
+  FlipX: false
+  FlipY: false
+  RotationAngle: 0
+  Pivot: {x: 0.000000, y: 0.000000}
+  ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+- !<ObjectPrefabAssetData/66073ab0-ccc4-4bfa-a538-ea1a529c24ff>
+  Prototype: !<ObjectOwner/d2436692-a349-4a85-85f7-25558046534d>
+    PackagePath: ""
+    objects:
+      - !<own> b9b8d80c-55ca-43e1-a593-bc33cf80f8cd
+- !<SceneObject/7df40cbf-c561-4221-9a10-83d67d1183c3>
+  PrefabRemaps:
+    []
+  Name: Image
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.100000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 2.000000, y: 2.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 5ac65a47-9849-4598-a736-93c5252f95a4
+- !<SceneObject/b9b8d80c-55ca-43e1-a593-bc33cf80f8cd>
+  PrefabRemaps:
+    []
+  Name: ImageButton
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 5.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 7df40cbf-c561-4221-9a10-83d67d1183c3
+  Components:
+    - !<own> 4a894bfd-a768-4c87-84e7-b911d4eea7a4

@@ -1,0 +1,69 @@
+- !<AssetImportMetadata/5e78d4fb-1072-4c5c-b2da-5c4b2d349d4b>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 7b413f42-a0a1-4cec-b5de-e54a75ad2d22
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 7b413f42-a0a1-4cec-b5de-e54a75ad2d22
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 0c961548-04f3-446c-82c7-49e279ea7f5b
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/0c961548-04f3-446c-82c7-49e279ea7f5b>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: 5fef9f20-2ba9-42d0-8b0b-7d5da2f212a4
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    depthFarMeters: false
+    depthNearMeters: false
+    depthStatusText: false
+    depthWindow: false
+    maxReasonableDepthMeters: false
+    reconnectDelaySeconds: false
+    rgbStatusText: false
+    rgbWindow: false
+    serverUrl: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - serverUrl: wss://holo-speccc.up.railway.app/ws?role=subscriber
+      rgbWindow: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      depthWindow: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      rgbStatusText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      depthStatusText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      reconnectDelaySeconds: 2
+      depthNearMeters: 0.2
+      depthFarMeters: 1.2
+      maxReasonableDepthMeters: 2
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input string serverUrl = "wss://holo-speccc.up.railway.app/ws?role=subscriber" {"label":"Server URL", "hint":"WebSocket subscriber endpoint for the HoloSpec relay"}'
+    - '// @input SceneObject rgbWindow {"label":"RGB Window", "hint":"Scene object whose RenderMeshVisual should display the RGB stream"}'
+    - '// @input SceneObject depthWindow {"label":"Depth Window", "hint":"Scene object whose RenderMeshVisual should display the depth preview"}'
+    - '// @input Component.Text rgbStatusText {"label":"RGB Status Text", "hint":"Optional text component used for the RGB frame label and status"}'
+    - '// @input Component.Text depthStatusText {"label":"Depth Status Text", "hint":"Optional text component used for the depth frame label and status"}'
+    - '// @input float reconnectDelaySeconds = 2 {"label":"Reconnect Delay", "hint":"Seconds to wait before reconnecting after disconnect"}'
+    - '// @input float depthNearMeters = 0.2 {"label":"Depth Near", "hint":"Meters mapped to the hottest/closest depth preview color"}'
+    - '// @input float depthFarMeters = 1.2 {"label":"Depth Far", "hint":"Meters mapped to the coolest/farthest depth preview color"}'
+    - '// @input float maxReasonableDepthMeters = 2 {"label":"Max Reasonable Depth", "hint":"Depth values beyond this range are treated as invalid"}'

@@ -31,11 +31,13 @@ final class CameraStreamService: NSObject, ObservableObject {
         let depth: DepthPayload
     }
 
-    @Published var endpoint = "ws://127.0.0.1:8080/ws?role=publisher"
+    @Published var endpoint = "wss://holo-speccc.up.railway.app/ws?role=publisher"
     @Published private(set) var isStreaming = false
     @Published private(set) var connectionStatus = "Idle"
     @Published private(set) var statusMessage = "Point the app at your relay URL, then start streaming."
     @Published private(set) var captureDeviceLabel = "Searching for TrueDepth camera"
+    @Published private(set) var colorResolutionLabel = "-"
+    @Published private(set) var depthResolutionLabel = "-"
 
     let captureSession = AVCaptureSession()
 
@@ -46,7 +48,7 @@ final class CameraStreamService: NSObject, ObservableObject {
     private let ciContext = CIContext()
     private let streamId = UUID().uuidString
     private let jsonEncoder = JSONEncoder()
-    private let targetFrameInterval: TimeInterval = 0.1
+    private let targetFrameInterval: TimeInterval = 0.25
 
     private var configured = false
     private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
@@ -294,6 +296,12 @@ final class CameraStreamService: NSObject, ObservableObject {
         self.isStreaming = connectionStatus == "Streaming" || connectionStatus == "Connected"
     }
 
+    @MainActor
+    private func updateFrameLabels(color: ColorPayload, depth: DepthPayload) {
+        colorResolutionLabel = "\(color.width) x \(color.height)"
+        depthResolutionLabel = "\(depth.width) x \(depth.height) (\(depth.bytesPerRow) B/row)"
+    }
+
     private func sendFrame(color: ColorPayload, depth: DepthPayload, timestamp: TimeInterval) {
         let envelope = FrameEnvelope(
             type: "frame",
@@ -416,6 +424,9 @@ extension CameraStreamService: AVCaptureDataOutputSynchronizerDelegate {
 
         lastFrameTime = now
         let timestamp = Date().timeIntervalSince1970
+        Task { @MainActor in
+            updateFrameLabels(color: colorPayload, depth: depthPayload)
+        }
         sendFrame(color: colorPayload, depth: depthPayload, timestamp: timestamp)
     }
 }

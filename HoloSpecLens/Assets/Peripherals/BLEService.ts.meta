@@ -1,0 +1,54 @@
+- !<AssetImportMetadata/b94ef469-8a7e-e4d8-b426-8039df9bff72>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> ca7638fd-a387-43e4-9ea7-d88565f58cda
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> ca7638fd-a387-43e4-9ea7-d88565f58cda
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 842e1239-b8cd-4886-af84-cf80836394b4
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/842e1239-b8cd-4886-af84-cf80836394b4>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: ee70f12b-20ae-49f5-abd3-5fe76809588a
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    bluetoothModule: false
+    mouseInput: false
+    screenText: false
+    touchpadInteractor: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - bluetoothModule: !<reference.BluetoothCentralModule> 00000000-0000-0000-0000-000000000000
+      screenText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      touchpadInteractor: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      mouseInput: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Asset.BluetoothCentralModule bluetoothModule
+    - // @input Component.Text screenText
+    - '// @input AssignableType_1 touchpadInteractor {"label":"Touchpad Interactor", "hint":"Optional: TouchpadInteractor component for touchpad input"}'
+    - '// @input AssignableType_2 mouseInput {"label":"Mouse Input", "hint":"Optional: MouseInput component for mouse/touchpad handling"}'

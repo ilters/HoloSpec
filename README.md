@@ -64,7 +64,7 @@ This project is ready to deploy directly on Railway.
 - Railway will use `npm start`
 - The health check endpoint is `/health`
 - Keep the service at `1` replica because publisher/subscriber sockets and latest frames are stored in memory
-- For the iOS app, use a `wss://` URL such as `wss://your-app.up.railway.app/ws?role=publisher`
+- For the iOS app, use a `wss://` URL such as `wss://holo-speccc.up.railway.app/ws?role=publisher`
 
 ## iOS App
 

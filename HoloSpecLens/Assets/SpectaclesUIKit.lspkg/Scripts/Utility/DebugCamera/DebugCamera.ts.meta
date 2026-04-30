@@ -1,0 +1,48 @@
+- !<AssetImportMetadata/16116fb7-86f0-9f5a-0fee-ac654fe03fd5>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 68669ec4-26f8-4815-9b61-281393a44ca9
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 68669ec4-26f8-4815-9b61-281393a44ca9
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 6beeca49-333c-45a4-89bc-c08098a449b6
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/6beeca49-333c-45a4-89bc-c08098a449b6>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: 140c925e-4e90-41c9-b81c-2c469ca35b60
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    attachToCamera: false
+    lookAt: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - lookAt: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      attachToCamera: false
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input SceneObject lookAt
+    - // @input bool attachToCamera

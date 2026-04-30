@@ -1,0 +1,54 @@
+- !<AssetImportMetadata/b93955bb-377e-f3a9-0cab-80dc3a30e8c8>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 32f5e352-e4f6-4d8c-8a02-3ef8eb8b1856
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 32f5e352-e4f6-4d8c-8a02-3ef8eb8b1856
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 5a3132e4-2d79-4593-8a39-9bc99285da5b
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/5a3132e4-2d79-4593-8a39-9bc99285da5b>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: 336679f3-44f2-46c9-b482-2509d397c2f8
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    _inactive: false
+    _playAudio: false
+    _renderOrder: false
+    _size: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - _renderOrder: 0
+      _size: !<Vec3> {x: 6.000000, y: 3.000000, z: 3.000000}
+      _inactive: false
+      _playAudio: false
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input int _renderOrder
+    - '// @input vec3 _size = {6,3,3} {"hint":"Size of the element in centimeters"}'
+    - '// @input bool _inactive {"hint":"Inactive Mode: set the element to ignore inputs"}'
+    - '// @input bool _playAudio {"label":"Play Audio", "hint":"Play audio on interaction"}'

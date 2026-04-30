@@ -1,0 +1,39 @@
+- !<NativePackageDescriptor/4fb3d67e-12a3-4816-a6aa-088cd9e6ee95>
+  PackagePath: ""
+  StudioVersion:
+    major: 5
+    minor: 21
+    patch: 0
+    build: 26041605
+    type: Unset
+    buildFlavor: ""
+    timestamp: 0
+    commit: ""
+  Description: Unit Box Mesh The Unit Box is a cube with 1 cm sides. You can apply real-world measurements to this object's scale and get an accurate visual representation. •Origin is in center of object •Dimensions are 1x1x1 cm •UV Mapped
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  VersionMajor: 1
+  VersionMinor: 0
+  VersionPatch: 0
+  UpdateCheckpoint: 97
+  ExportUid: 1691eda9-0963-4f76-9dd1-350dbc8afd4d
+  ComponentUid: fb856987-b426-4d10-9940-f7d8b75176b4
+  PackagePolicy: CanBeUnpackedTransparent
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  Instantiable: !<reference> 00000000-0000-0000-0000-000000000000
+  AssetLibraryDependencyStructure: !<AssetLibraryDependencyStructure>
+    Name: ""
+    AssetId: ""
+    Hash: ""
+    Version:
+      major: 0
+      minor: 0
+      patch: 0
+      build: 0
+  coreVersion: 360
+  clientVersion: 13.8999996

@@ -1,0 +1,39 @@
+- !<NativePackageDescriptor/d476b29e-b596-4171-94b5-842dbc8d1298>
+  PackagePath: ""
+  StudioVersion:
+    major: 5
+    minor: 21
+    patch: 0
+    build: 26041605
+    type: Unset
+    buildFlavor: ""
+    timestamp: 0
+    commit: ""
+  Description: Unit Plane Mesh The Unit Plane has 1 cm sides. You can apply real-world measurements to this object's scale and get an accurate visual representation •Origin is in center of object •Dimensions are 1x1 cm •Single sided
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  VersionMajor: 1
+  VersionMinor: 0
+  VersionPatch: 0
+  UpdateCheckpoint: 97
+  ExportUid: 275714d6-c111-49ec-b60e-c83d86bae5b2
+  ComponentUid: ab090817-1916-4c80-8f16-2a38c86d6dd2
+  PackagePolicy: CanBeUnpackedTransparent
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  Instantiable: !<reference> 00000000-0000-0000-0000-000000000000
+  AssetLibraryDependencyStructure: !<AssetLibraryDependencyStructure>
+    Name: ""
+    AssetId: ""
+    Hash: ""
+    Version:
+      major: 0
+      minor: 0
+      patch: 0
+      build: 0
+  coreVersion: 360
+  clientVersion: 13.8999996

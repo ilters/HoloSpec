@@ -1,0 +1,66 @@
+- !<AssetImportMetadata/5c3437b0-b9b8-7e55-37e3-9fba485e8f5a>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 7df21f63-8d99-41d4-931e-712c62af8e40
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 7df21f63-8d99-41d4-931e-712c62af8e40
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 333ee3c7-bf02-49fa-8d75-2dcfc0917b21
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/333ee3c7-bf02-49fa-8d75-2dcfc0917b21>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: 2914966b-f033-4402-9fb9-9077e27f08bb
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    _edgeFade: false
+    _horizontal: false
+    _scrollDimensions: false
+    _scrollPosition: false
+    _scrollSnapping: false
+    _snapRegion: false
+    _vertical: false
+    _windowSize: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - _vertical: true
+      _horizontal: false
+      _windowSize: !<Vec2> {x: 32.000000, y: 32.000000}
+      _scrollDimensions: !<Vec2> {x: 32.000000, y: 100.000000}
+      _scrollPosition: !<Vec2> {x: 0.000000, y: 0.000000}
+      _scrollSnapping: false
+      _snapRegion: !<Vec2> {x: -1.000000, y: 20.000000}
+      _edgeFade: false
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input bool _vertical = true {"hint":"Enable Vertical Scrolling"}'
+    - '// @input bool _horizontal {"hint":"Enable Horizontal Scrolling"}'
+    - '// @input vec2 _windowSize = "{32,32}" {"hint":"Size of masked window viewport in local space. <br><br>Note: to set dynamically, use <code>setWindowSize</code>"}'
+    - '// @input vec2 _scrollDimensions = "{32,100}" {"hint":"Size of total scrollable area. <br><br>Note: to set dynamically, use <code>setScrollDimensions</code>"}'
+    - '// @input vec2 _scrollPosition {"label":"Scroll Position", "hint":"Scroll Position in pixels in local space"}'
+    - // @input bool _scrollSnapping
+    - '// @input vec2 _snapRegion = {8,8} {"showIf":"_scrollSnapping"}'
+    - '// @input bool _edgeFade {"hint":"Add black fade to edges <code>(rendering trick for transparency)</code>"}'

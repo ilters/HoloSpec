@@ -1,0 +1,60 @@
+- !<AssetImportMetadata/951c4417-0062-4bdb-b140-a206f004ed3e>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> a601999e-e7f3-440c-8c72-3f801ec67c49
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> a601999e-e7f3-440c-8c72-3f801ec67c49
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 0b11e968-5882-4dd8-8f61-63a95593aa3a
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/0b11e968-5882-4dd8-8f61-63a95593aa3a>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: 1782a6e9-b64a-41e0-b52f-66fbaff121f2
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    autoHide: false
+    browserClient: false
+    fadeDelay: false
+    minThumbHeight: false
+    scrollbarThumb: false
+    scrollbarTrack: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - browserClient: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      scrollbarThumb: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      scrollbarTrack: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
+      minThumbHeight: !<float> 2.000000
+      autoHide: true
+      fadeDelay: 1.500000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input AssignableType_1 browserClient {"label":"Browser Client", "hint":"The RemoteBrowserClient to listen to for scroll updates"}'
+    - '// @input AssignableType_2 scrollbarThumb {"label":"Scrollbar Thumb", "hint":"The thumb indicator that moves within the track"}'
+    - '// @input AssignableType_3 scrollbarTrack {"label":"Scrollbar Track", "hint":"The background track that contains the thumb"}'
+    - '// @input float minThumbHeight = 2 {"label":"Min Thumb Height", "hint":"Minimum height of the scrollbar thumb in world units"}'
+    - "// @input bool autoHide = true {\"label\":\"Auto Hide When No Scroll\", \"hint\":\"Hide the scrollbar when the document doesn't need scrolling\"}"
+    - '// @input float fadeDelay = 1.5 {"label":"Fade Delay (seconds)", "hint":"How long to wait before fading out the scrollbar after scrolling stops (0 = no fade)"}'

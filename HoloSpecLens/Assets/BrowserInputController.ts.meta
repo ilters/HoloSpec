@@ -1,0 +1,69 @@
+- !<AssetImportMetadata/90da2d3b-8254-4c2d-9b39-4409318ddb49>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 83965b82-2435-41df-ab14-fc6bf96a91a2
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 83965b82-2435-41df-ab14-fc6bf96a91a2
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 6c4e4e46-c3ff-4ff3-8aac-7715796f005c
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/6c4e4e46-c3ff-4ff3-8aac-7715796f005c>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: d4b3892c-e6cd-44c6-a466-c1610ead5502
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    browserWindow: false
+    cursorImg: false
+    debugText: false
+    handInteractor: false
+    interactorCursor: false
+    mouseInteractor: false
+    touchpadInteractor: false
+    triggerDownSound: false
+    triggerUpSound: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - handInteractor: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      touchpadInteractor: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      mouseInteractor: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
+      browserWindow: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      debugText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      triggerDownSound: !<reference.AudioComponent> 00000000-0000-0000-0000-000000000000
+      triggerUpSound: !<reference.AudioComponent> 00000000-0000-0000-0000-000000000000
+      cursorImg: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      interactorCursor: !<MappingBased.AssignableType_4> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input AssignableType_1 handInteractor {"label":"Hand Interactor (Device Only)", "hint":"Wire up the right hand interactor for mouse input on device"}'
+    - '// @input AssignableType_2 touchpadInteractor {"label":"Touchpad Interactor (Device Only)", "hint":"Optional: Wire up the touchpad interactor for Spectacles Peripheral support"}'
+    - '// @input AssignableType_3 mouseInteractor {"label":"Mouse Interactor (Editor Only)", "hint":"Wire up the mouse interactor for testing in editor"}'
+    - '// @input SceneObject browserWindow {"label":"Browser Window Scene Object", "hint":"The scene object that displays the browser"}'
+    - '// @input Component.Text debugText {"label":"Debug Text", "hint":"Optional text component to display debug information"}'
+    - '// @input Component.AudioComponent triggerDownSound {"label":"Trigger Down Sound", "hint":"Audio component to play when trigger is pressed down"}'
+    - '// @input Component.AudioComponent triggerUpSound {"label":"Trigger Up Sound", "hint":"Audio component to play when trigger is released"}'
+    - '// @input SceneObject cursorImg {"label":"Cursor Image", "hint":"Scene object with the cursor image to show when targeting the browser"}'
+    - '// @input AssignableType_4 interactorCursor {"label":"Interactor Cursor", "hint":"The InteractorCursor component to hide when targeting the browser"}'

@@ -1,0 +1,103 @@
+- !<AssetImportMetadata/af918c8b-c8ea-32ff-e199-8b80ae3f7968>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> af2795aa-5f6b-4655-92df-309195633269
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> af2795aa-5f6b-4655-92df-309195633269
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 960d54b4-6e66-4a83-949d-9576ed919c33
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/960d54b4-6e66-4a83-949d-9576ed919c33>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: deaf92d7-8f12-4c19-93dd-52b152211005
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    _hasShadow: false
+    _inactive: false
+    _playAudio: false
+    _renderOrder: false
+    _shadowPositionOffset: false
+    _size: false
+    addCallbacks: false
+    alternateIcon: false
+    changeIconOnFocus: false
+    contentRequiredOnDeactivate: false
+    fontFamily: false
+    formatType: false
+    icon: false
+    inputType: false
+    onKeyboardStateChangedCallbacks: false
+    onTextChangedCallbacks: false
+    placeholderText: false
+    useIcon: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - _renderOrder: 0
+      _size: !<Vec3> {x: 30.000000, y: 6.000000, z: 0.000000}
+      _inactive: false
+      _playAudio: false
+      _hasShadow: true
+      _shadowPositionOffset: !<Vec3> {x: 0.050000, y: -0.050000, z: -0.010000}
+      inputType: default
+      formatType: date
+      placeholderText: ""
+      fontFamily: !<reference.Font> 00000000-0000-0000-0000-000000000000
+      useIcon: false
+      icon: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      changeIconOnFocus: false
+      alternateIcon: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      contentRequiredOnDeactivate: false
+      addCallbacks: false
+      onTextChangedCallbacks:
+        []
+      onKeyboardStateChangedCallbacks:
+        []
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input int _renderOrder
+    - '// @input vec3 _size = {6,3,3} {"hint":"Size of the element in centimeters"}'
+    - '// @input bool _inactive {"hint":"Inactive Mode: set the element to ignore inputs"}'
+    - '// @input bool _playAudio {"label":"Play Audio", "hint":"Play audio on interaction"}'
+    - // @input bool _hasShadow
+    - '// @input vec3 _shadowPositionOffset = "{0.05,-0.05,-0.01}" {"showIf":"_hasShadow"}'
+    - '// @input string inputType = "default" {"widget":"combobox", "values":[{"label":"Default", "value":"default"}, {"label":"Numeric", "value":"numeric"}, {"label":"Password", "value":"password"}, {"label":"Pin", "value":"pin"}]}'
+    - '// @input string formatType = "date" {"widget":"combobox", "values":[{"label":"Date", "value":"date"}, {"label":"Email", "value":"email"}, {"label":"URL", "value":"url"}], "showIf":"inputType", "showIfValue":"format"}'
+    - '// @input string placeholderText {"hint":"Text that is displayed before any text is entered"}'
+    - '// @input Asset.Font fontFamily {"hint":"Font Family"}'
+    - '// @input bool useIcon {"hint":"Use an icon?"}'
+    - '// @input Asset.Texture icon {"hint":"Icon Texture", "showIf":"useIcon", "showIfValue":true}'
+    - '// @input bool changeIconOnFocus {"hint":"Switch to a different icon on focus", "showIf":"useIcon"}'
+    - '// @input Asset.Texture alternateIcon {"hint":"Alternate icon used on focus", "showIf":"changeIconOnFocus", "showIfValue":true}'
+    - '// @input bool contentRequiredOnDeactivate {"hint":"Throw error if unfocused with no input"}'
+    - "// @input bool addCallbacks {\"hint\":\"Enable this to add functions from another script to this component's callbacks\"}"
+    - /*
+    - "@typedef Callback"
+    - "@property {Component.ScriptComponent} scriptComponent"
+    - "@property {string} functionName"
+    - "*/"
+    - '// @input Callback[] onTextChangedCallbacks = {} {"label":"On Text Changed Callbacks", "showIf":"addCallbacks"}'
+    - '// @input Callback[] onKeyboardStateChangedCallbacks = {} {"label":"On Keyboard State Changed Callbacks", "showIf":"addCallbacks"}'

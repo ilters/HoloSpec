@@ -1,0 +1,132 @@
+- !<AssetImportMetadata/d93e7d16-df23-17db-dcfc-42614605831e>
+  ImportedAssetIds:
+    ObjectPrefab: !<reference> 27c50473-a522-421c-955e-7a6d3cf62fe3
+  ImporterName: ObjectPrefabImporter
+  PrimaryAsset: !<reference> 27c50473-a522-421c-955e-7a6d3cf62fe3
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    ObjectPrefab: !<own> f31effcf-db44-498c-82b5-9b2b9fc42299
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<Image/04c16b5a-af47-4806-af3b-015b44fb0855>
+  PrefabRemaps:
+    []
+  Name: Image
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Fit
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 6445f02e-40a6-4c86-8f6d-209b8e2cdba0
+  FlipX: false
+  FlipY: false
+  RotationAngle: 0
+  Pivot: {x: 0.000000, y: 0.000000}
+  ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+- !<SceneObject/9c856380-fc46-476a-8d27-f78fc1c3a2f6>
+  PrefabRemaps:
+    []
+  Name: ImageButton
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 5.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> c3500e54-06be-4cd0-92e0-b186dfac0d56
+  Components:
+    - !<own> e414b86b-aeeb-4903-b037-894ae8676b45
+    - !<own> ff3c0f46-a6db-4c44-a45e-aca9f27ea4bb
+- !<SceneObject/c3500e54-06be-4cd0-92e0-b186dfac0d56>
+  PrefabRemaps:
+    []
+  Name: Image
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.100000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 2.000000, y: 2.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 04c16b5a-af47-4806-af3b-015b44fb0855
+- !<ScriptComponent/e414b86b-aeeb-4903-b037-894ae8676b45>
+  PrefabRemaps:
+    []
+  Name: RoundButton
+  Enabled: true
+  ScriptAsset: !<reference> 56f20285-e860-4598-80ef-58fe2713f15b
+  ScriptInputsDefault:
+    _renderOrder: true
+    _inactive: true
+    _playAudio: true
+    _style: true
+    _hasShadow: true
+    _shadowPositionOffset: true
+    _toggleable: true
+    _defaultToOn: true
+    addCallbacks: true
+    triggerUpCallbacks: true
+    triggerDownCallbacks: true
+    onValueChangeCallbacks: true
+    onFinishedCallbacks: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      _renderOrder: 0
+      _inactive: false
+      _playAudio: false
+      _style: PrimaryNeutral
+      _hasShadow: false
+      _shadowPositionOffset: !<Vec3> {x: 0.050000, y: -0.050000, z: -0.010000}
+      _toggleable: false
+      _defaultToOn: false
+      addCallbacks: false
+      triggerUpCallbacks:
+        []
+      triggerDownCallbacks:
+        []
+      onValueChangeCallbacks:
+        []
+      onFinishedCallbacks:
+        []
+      _width: !<float> 3.000000
+  ScriptTypes:
+    "":
+      {}
+- !<ObjectPrefabAssetData/f31effcf-db44-498c-82b5-9b2b9fc42299>
+  Prototype: !<ObjectOwner/87603d62-d8b2-4869-b5a9-f8457748dd16>
+    PackagePath: ""
+    objects:
+      - !<own> 9c856380-fc46-476a-8d27-f78fc1c3a2f6
+- !<ScriptComponent/ff3c0f46-a6db-4c44-a45e-aca9f27ea4bb>
+  PrefabRemaps:
+    []
+  Name: FrameButton
+  Enabled: true
+  ScriptAsset: !<reference> 3c65055c-afd0-49b8-9acb-6bc750e56e09
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      image: !<reference.Image> 04c16b5a-af47-4806-af3b-015b44fb0855
+  ScriptTypes:
+    "":
+      {}

@@ -1,0 +1,57 @@
+- !<AssetImportMetadata/061f2537-fc5a-69ee-a90e-643a3cff5f97>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 3539426c-c871-4336-ad0f-1c0b8ba00ad4
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 3539426c-c871-4336-ad0f-1c0b8ba00ad4
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 8b050103-7b98-4ce0-869a-7ed02f3b0abe
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/8b050103-7b98-4ce0-869a-7ed02f3b0abe>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: c4ec55be-629f-4a65-b220-5d6173ae32ac
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    _playAudio: false
+    _renderOrder: false
+    orientation: false
+    scrollWindow: false
+    size: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - _renderOrder: 0
+      size: !<Vec2> {x: 20.000000, y: 1.800000}
+      orientation: Vertical
+      scrollWindow: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      _playAudio: false
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input int _renderOrder = "0"'
+    - "// @input vec2 size = {20,1.8}"
+    - '// @input string orientation = "Vertical" {"widget":"combobox", "values":[{"label":"Horizontal", "value":"Horizontal"}, {"label":"Vertical", "value":"Vertical"}]}'
+    - // @input AssignableType_1 scrollWindow
+    - // @input bool _playAudio

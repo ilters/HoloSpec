@@ -1,0 +1,54 @@
+- !<AssetImportMetadata/009891c0-eaab-446b-affa-97c29cc43c91>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> b848348c-52c1-4ebe-9715-1aed1267a898
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> b848348c-52c1-4ebe-9715-1aed1267a898
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 0b1b7bcb-28d6-44ee-bd06-b0e8dd1f8586
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/0b1b7bcb-28d6-44ee-bd06-b0e8dd1f8586>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  ComponentUid: ed90cacd-1d75-4e69-9a5e-1cf30c1d0b52
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    browserClient: false
+    enableAutoCycle: false
+    internetModule: false
+    updateInterval: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - internetModule: !<reference.InternetModule> 00000000-0000-0000-0000-000000000000
+      browserClient: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      updateInterval: !<float> 5.000000
+      enableAutoCycle: true
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Asset.InternetModule internetModule
+    - '// @input AssignableType_1 browserClient {"label":"Remote Browser Client", "hint":"The RemoteBrowserClient component to control navigation and get server URL"}'
+    - '// @input float updateInterval = 5 {"label":"Update Interval (seconds)", "hint":"How often to cycle through HTML pages"}'
+    - '// @input bool enableAutoCycle = true {"label":"Enable Auto Cycle", "hint":"Automatically cycle through pages"}'
