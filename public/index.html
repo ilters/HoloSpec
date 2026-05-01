@@ -130,6 +130,10 @@
           <dd id="stream-id">None</dd>
           <dt>Frame timestamp</dt>
           <dd id="timestamp">-</dd>
+          <dt>Received FPS</dt>
+          <dd id="received-fps">-</dd>
+          <dt>Rendered FPS</dt>
+          <dd id="rendered-fps">-</dd>
           <dt>Color size</dt>
           <dd id="color-size">-</dd>
           <dt>Depth size</dt>
@@ -143,6 +147,8 @@
       const streamMetaEl = document.getElementById("stream-meta");
       const streamIdEl = document.getElementById("stream-id");
       const timestampEl = document.getElementById("timestamp");
+      const receivedFpsEl = document.getElementById("received-fps");
+      const renderedFpsEl = document.getElementById("rendered-fps");
       const colorSizeEl = document.getElementById("color-size");
       const depthSizeEl = document.getElementById("depth-size");
       const colorFrameEl = document.getElementById("color-frame");
@@ -155,6 +161,8 @@
       let currentColorUrl = null;
       let latestFrame = null;
       let renderScheduled = false;
+      let receivedFrames = [];
+      let renderedFrames = [];
 
       function base64ToArrayBuffer(base64) {
         const binary = atob(base64);
@@ -298,18 +306,42 @@
         colorFrameEl.src = `data:image/jpeg;base64,${base64}`;
       }
 
-      function updateFrameMetadata(streamId, timestamp, colorWidth, colorHeight, depthWidth, depthHeight, depthStats) {
+      function pruneFrameTimes(frameTimes, nowMs) {
+        while (frameTimes.length > 0 && nowMs - frameTimes[0] > 1000) {
+          frameTimes.shift();
+        }
+      }
+
+      function updateFpsDebug(nowMs) {
+        pruneFrameTimes(receivedFrames, nowMs);
+        pruneFrameTimes(renderedFrames, nowMs);
+        receivedFpsEl.textContent = `${receivedFrames.length.toFixed(0)} fps`;
+        renderedFpsEl.textContent = `${renderedFrames.length.toFixed(0)} fps`;
+      }
+
+      function updateFrameMetadata(
+        streamId,
+        timestamp,
+        colorWidth,
+        colorHeight,
+        depthWidth,
+        depthHeight,
+        depthBytesPerRow,
+        depthStats,
+      ) {
         const depthSummary = depthStats.minDepth === null
           ? "no valid depth"
           : `${depthStats.minDepth.toFixed(2)}-${depthStats.maxDepth.toFixed(2)}m`;
-        const latencyMs = Math.max(0, Math.round(Date.now() - timestamp * 1000));
+        const nowMs = Date.now();
+        const latencyMs = Math.max(0, Math.round(nowMs - timestamp * 1000));
 
         streamMetaEl.textContent = `Viewer lag: ${latencyMs}ms`;
         streamIdEl.textContent = streamId;
         timestampEl.textContent = new Date(timestamp * 1000).toLocaleString();
         colorSizeEl.textContent = `${colorWidth} x ${colorHeight}`;
         depthSizeEl.textContent =
-          `${depthWidth} x ${depthHeight} • valid ${(depthStats.validRatio * 100).toFixed(1)}% • ${depthSummary}`;
+          `${depthWidth} x ${depthHeight} • ${depthBytesPerRow} B/row • valid ${(depthStats.validRatio * 100).toFixed(1)}% • ${depthSummary}`;
+        updateFpsDebug(nowMs);
       }
 
       function renderTextFrame(message) {
@@ -334,6 +366,7 @@
           frame.color.height,
           frame.depth.width,
           frame.depth.height,
+          frame.depth.bytesPerRow,
           depthStats
         );
       }
@@ -353,6 +386,7 @@
             return;
           }
 
+          renderedFrames.push(Date.now());
           renderTextFrame(frame.message);
 
           if (latestFrame) {
@@ -375,6 +409,7 @@
 
       socket.addEventListener("message", ({ data }) => {
         if (typeof data === "string" && data.startsWith(FRAME_MAGIC)) {
+          receivedFrames.push(Date.now());
           latestFrame = { message: data };
           scheduleRender();
           return;
