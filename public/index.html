@@ -148,8 +148,7 @@
       const colorFrameEl = document.getElementById("color-frame");
       const depthCanvas = document.getElementById("depth-canvas");
       const depthContext = depthCanvas.getContext("2d");
-      const FRAME_MAGIC = "HSF1";
-      const FIXED_HEADER_LENGTH = 80;
+      const FRAME_MAGIC = "HSF2";
       const DEPTH_PREVIEW_NEAR_METERS = 0.2;
       const DEPTH_PREVIEW_FAR_METERS = 1.2;
       const MAX_REASONABLE_DEPTH_METERS = 2.0;
@@ -170,14 +169,6 @@
         return Math.min(max, Math.max(min, value));
       }
 
-      function bytesToString(bytes) {
-        let result = "";
-        for (let index = 0; index < bytes.length; index += 1) {
-          result += String.fromCharCode(bytes[index]);
-        }
-        return result;
-      }
-
       function turboColor(normalized) {
         const x = clamp(normalized, 0, 1);
         const red = 34.61 + x * (1172.33 + x * (-10793.56 + x * (33300.12 + x * (-38394.49 + x * 14825.05))));
@@ -191,54 +182,48 @@
         ];
       }
 
-      function parseBinaryFrame(buffer) {
-        const view = new DataView(buffer);
-        const magicBytes = new Uint8Array(buffer, 0, 4);
-        const magic = bytesToString(magicBytes);
-        if (magic !== FRAME_MAGIC) {
+      function parseTextFrame(message) {
+        if (!message.startsWith(FRAME_MAGIC)) {
           return null;
         }
 
-        const version = view.getUint8(4);
-        const messageType = view.getUint8(5);
-        const headerLength = view.getUint16(6, true);
-        const timestamp = view.getFloat64(8, true);
-        const colorWidth = view.getUint16(16, true);
-        const colorHeight = view.getUint16(18, true);
-        const depthWidth = view.getUint16(20, true);
-        const depthHeight = view.getUint16(22, true);
-        const depthBytesPerRow = view.getUint32(24, true);
-        const colorLength = view.getUint32(28, true);
-        const depthLength = view.getUint32(32, true);
-        const streamIdLength = view.getUint16(36, true);
-
-        if (version !== 1 || messageType !== 1 || headerLength !== FIXED_HEADER_LENGTH + streamIdLength) {
+        const firstNewline = message.indexOf("\n");
+        if (firstNewline === -1) {
           return null;
         }
 
-        if (buffer.byteLength !== headerLength + colorLength + depthLength) {
+        const secondNewline = message.indexOf("\n", firstNewline + 1);
+        if (secondNewline === -1) {
           return null;
         }
 
-        const streamIdBytes = new Uint8Array(buffer, FIXED_HEADER_LENGTH, streamIdLength);
-        const streamId = bytesToString(streamIdBytes) || "default";
-        const colorBytes = new Uint8Array(buffer, headerLength, colorLength);
-        const depthBytes = new Uint8Array(buffer, headerLength + colorLength, depthLength);
+        const headerParts = message.slice(0, firstNewline).split("|");
+        if (headerParts.length < 12 || headerParts[0] !== FRAME_MAGIC) {
+          return null;
+        }
+
+        const intrinsics = headerParts[11]
+          ? headerParts[11].split(",").map((value) => Number.parseFloat(value))
+          : [];
 
         return {
-          streamId,
-          timestamp,
+          streamId: headerParts[2] || "default",
+          timestamp: Number.parseFloat(headerParts[1]),
           color: {
-            width: colorWidth,
-            height: colorHeight,
-            bytes: colorBytes
+            width: Number.parseInt(headerParts[3], 10),
+            height: Number.parseInt(headerParts[4], 10),
+            data: message.slice(firstNewline + 1, secondNewline)
           },
           depth: {
-            width: depthWidth,
-            height: depthHeight,
-            bytesPerRow: depthBytesPerRow,
-            bytes: depthBytes
-          }
+            width: Number.parseInt(headerParts[5], 10),
+            height: Number.parseInt(headerParts[6], 10),
+            bytesPerRow: Number.parseInt(headerParts[7], 10),
+            data: message.slice(secondNewline + 1)
+          },
+          referenceWidth: Number.parseInt(headerParts[8], 10),
+          referenceHeight: Number.parseInt(headerParts[9], 10),
+          flags: Number.parseInt(headerParts[10], 10),
+          intrinsics
         };
       }
 
@@ -304,16 +289,6 @@
         };
       }
 
-      function setColorFrameFromBytes(bytes) {
-        if (currentColorUrl) {
-          URL.revokeObjectURL(currentColorUrl);
-        }
-
-        const blob = new Blob([bytes], { type: "image/jpeg" });
-        currentColorUrl = URL.createObjectURL(blob);
-        colorFrameEl.src = currentColorUrl;
-      }
-
       function setColorFrameFromBase64(base64) {
         if (currentColorUrl) {
           URL.revokeObjectURL(currentColorUrl);
@@ -337,45 +312,21 @@
           `${depthWidth} x ${depthHeight} • valid ${(depthStats.validRatio * 100).toFixed(1)}% • ${depthSummary}`;
       }
 
-      function renderJsonFrame(message) {
-        if (!message.color || !message.depth) {
-          return;
-        }
-
-        const depthBytes = new Uint8Array(base64ToArrayBuffer(message.depth.data));
-        const depthStats = renderDepthFrame(
-          message.depth.width,
-          message.depth.height,
-          message.depth.bytesPerRow,
-          depthBytes
-        );
-
-        setColorFrameFromBase64(message.color.data);
-        updateFrameMetadata(
-          message.streamId || "default",
-          message.timestamp,
-          message.color.width,
-          message.color.height,
-          message.depth.width,
-          message.depth.height,
-          depthStats
-        );
-      }
-
-      function renderBinaryFrame(buffer) {
-        const frame = parseBinaryFrame(buffer);
+      function renderTextFrame(message) {
+        const frame = parseTextFrame(message);
         if (!frame) {
           return;
         }
 
+        const depthBytes = new Uint8Array(base64ToArrayBuffer(frame.depth.data));
         const depthStats = renderDepthFrame(
           frame.depth.width,
           frame.depth.height,
           frame.depth.bytesPerRow,
-          frame.depth.bytes
+          depthBytes
         );
 
-        setColorFrameFromBytes(frame.color.bytes);
+        setColorFrameFromBase64(frame.color.data);
         updateFrameMetadata(
           frame.streamId,
           frame.timestamp,
@@ -402,11 +353,7 @@
             return;
           }
 
-          if (frame.kind === "json") {
-            renderJsonFrame(frame.message);
-          } else {
-            renderBinaryFrame(frame.buffer);
-          }
+          renderTextFrame(frame.message);
 
           if (latestFrame) {
             scheduleRender();
@@ -416,7 +363,6 @@
 
       const wsProtocol = location.protocol === "https:" ? "wss" : "ws";
       const socket = new WebSocket(`${wsProtocol}://${location.host}/ws?role=subscriber`);
-      socket.binaryType = "arraybuffer";
 
       socket.addEventListener("open", () => {
         statusEl.textContent = "Connected";
@@ -428,19 +374,13 @@
       });
 
       socket.addEventListener("message", ({ data }) => {
-        if (typeof data !== "string") {
-          latestFrame = { kind: "binary", buffer: data };
+        if (typeof data === "string" && data.startsWith(FRAME_MAGIC)) {
+          latestFrame = { message: data };
           scheduleRender();
           return;
         }
 
         const message = JSON.parse(data);
-        if (message.type === "frame") {
-          latestFrame = { kind: "json", message };
-          scheduleRender();
-          return;
-        }
-
         if (message.type === "hello_ack") {
           statusEl.textContent = `Subscribed (${message.activeStreams.length} streams cached)`;
         }

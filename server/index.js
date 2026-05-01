@@ -30,9 +30,7 @@ const socketsByRole = {
 };
 
 const latestFrames = new Map();
-const BINARY_MAGIC = "HSF1";
-const FRAME_MESSAGE_TYPE = 1;
-const FIXED_HEADER_LENGTH = 80;
+const TEXT_FRAME_MAGIC = "HSF2";
 
 function safeSend(socket, payload) {
   if (socket.readyState === WebSocket.OPEN) {
@@ -59,50 +57,55 @@ function unregisterSocket(socket) {
   }
 }
 
-function parseBinaryFrameHeader(buffer) {
-  if (!Buffer.isBuffer(buffer) || buffer.length < FIXED_HEADER_LENGTH) {
+function parseTextFrameHeader(message) {
+  if (typeof message !== "string" || !message.startsWith(TEXT_FRAME_MAGIC)) {
     return null;
   }
 
-  if (buffer.toString("ascii", 0, 4) !== BINARY_MAGIC) {
+  const firstNewline = message.indexOf("\n");
+  if (firstNewline === -1) {
     return null;
   }
 
-  const version = buffer.readUInt8(4);
-  const messageType = buffer.readUInt8(5);
-  const headerLength = buffer.readUInt16LE(6);
-  const streamIdLength = buffer.readUInt16LE(36);
-
-  if (version !== 1 || messageType !== FRAME_MESSAGE_TYPE) {
+  const headerParts = message.slice(0, firstNewline).split("|");
+  if (headerParts.length < 12 || headerParts[0] !== TEXT_FRAME_MAGIC) {
     return null;
   }
 
-  if (headerLength !== FIXED_HEADER_LENGTH + streamIdLength) {
-    return null;
-  }
-
-  const colorLength = buffer.readUInt32LE(28);
-  const depthLength = buffer.readUInt32LE(32);
-  const totalLength = headerLength + colorLength + depthLength;
-
-  if (buffer.length !== totalLength) {
-    return null;
-  }
-
-  const streamId = buffer.toString("utf8", FIXED_HEADER_LENGTH, headerLength) || "default";
+  const streamId = headerParts[2] || "default";
   return { streamId };
 }
 
 function handleTextMessage(socket, rawMessage) {
+  const messageText = rawMessage.toString();
+  const frameHeader = parseTextFrameHeader(messageText);
+
+  if (frameHeader) {
+    if (socket.role !== "publisher") {
+      safeSend(
+        socket,
+        JSON.stringify({
+          type: "error",
+          message: "Only publisher clients can send frame payloads."
+        })
+      );
+      return;
+    }
+
+    latestFrames.set(frameHeader.streamId, messageText);
+    broadcastToSubscribers(messageText);
+    return;
+  }
+
   let message;
   try {
-    message = JSON.parse(rawMessage.toString());
+    message = JSON.parse(messageText);
   } catch {
     safeSend(
       socket,
       JSON.stringify({
         type: "error",
-        message: "Messages must be valid JSON."
+        message: "Messages must be valid JSON or HSF2 frame packets."
       })
     );
     return;
@@ -131,66 +134,13 @@ function handleTextMessage(socket, rawMessage) {
     }
     return;
   }
-
-  if (socket.role !== "publisher") {
-    safeSend(
-      socket,
-      JSON.stringify({
-        type: "error",
-        message: "Only publisher clients can send frame payloads."
-      })
-    );
-    return;
-  }
-
-  if (message.type !== "frame") {
-    safeSend(
-      socket,
-      JSON.stringify({
-        type: "error",
-        message: `Unsupported publisher message type: ${message.type || "unknown"}`
-      })
-    );
-    return;
-  }
-
-  const streamId = typeof message.streamId === "string" && message.streamId.length > 0
-    ? message.streamId
-    : "default";
-
-  message.serverReceivedAt = Date.now();
-
-  const serialized = JSON.stringify(message);
-  latestFrames.set(streamId, serialized);
-  broadcastToSubscribers(serialized);
-}
-
-function handleBinaryMessage(socket, rawMessage) {
-  if (socket.role !== "publisher") {
-    safeSend(
-      socket,
-      JSON.stringify({
-        type: "error",
-        message: "Only publisher clients can send frame payloads."
-      })
-    );
-    return;
-  }
-
-  const frameHeader = parseBinaryFrameHeader(rawMessage);
-  if (!frameHeader) {
-    safeSend(
-      socket,
-      JSON.stringify({
-        type: "error",
-        message: "Unsupported binary frame payload."
-      })
-    );
-    return;
-  }
-
-  latestFrames.set(frameHeader.streamId, Buffer.from(rawMessage));
-  broadcastToSubscribers(rawMessage);
+  safeSend(
+    socket,
+    JSON.stringify({
+      type: "error",
+      message: `Unsupported message type: ${message.type || "unknown"}`
+    })
+  );
 }
 
 wss.on("connection", (socket, request) => {
@@ -206,12 +156,7 @@ wss.on("connection", (socket, request) => {
     })
   );
 
-  socket.on("message", (message, isBinary) => {
-    if (isBinary) {
-      handleBinaryMessage(socket, Buffer.from(message));
-      return;
-    }
-
+  socket.on("message", (message) => {
     handleTextMessage(socket, message);
   });
   socket.on("close", () => unregisterSocket(socket));

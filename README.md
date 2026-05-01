@@ -16,44 +16,26 @@ This repository contains:
 
 ## Wire Format
 
-The live frame path now uses binary WebSocket messages instead of JSON + base64 payloads. Each frame packet contains:
+The live frame path uses a compact text WebSocket frame format instead of giant JSON envelopes.
 
-- `HSF1` magic + protocol version
-- frame timestamp
-- RGB width and height
-- depth width, height, and `bytesPerRow`
-- RGB JPEG byte length
-- depth raw byte length
-- stream id
-- 3x3 depth intrinsics matrix
-- reference dimensions and a depth-filtered flag
-- raw JPEG bytes followed by raw little-endian `Float32` depth bytes in meters
+Each frame is sent as three lines:
 
-The relay still accepts the older JSON frame format as a compatibility fallback. Legacy JSON frames look like:
+1. A header line with `|`-separated metadata
+2. The RGB JPEG bytes encoded as base64
+3. The depth `Float32` bytes encoded as base64
 
-```json
-{
-  "type": "frame",
-  "streamId": "uuid-string",
-  "timestamp": 1714240000.123,
-  "color": {
-    "encoding": "jpeg-base64",
-    "width": 640,
-    "height": 480,
-    "data": "..."
-  },
-  "depth": {
-    "encoding": "depth-float32-base64",
-    "width": 320,
-    "height": 240,
-    "bytesPerRow": 1280,
-    "data": "...",
-    "units": "meters"
-  }
-}
+Header layout:
+
+```text
+HSF2|timestamp|streamId|colorWidth|colorHeight|depthWidth|depthHeight|bytesPerRow|referenceWidth|referenceHeight|flags|i0,i1,i2,i3,i4,i5,i6,i7,i8
 ```
 
-The depth payload is raw little-endian `Float32` data in meters. `bytesPerRow` is included because some consumers may need to account for row padding.
+Notes:
+
+- `flags` currently uses bit `0` for the depth filtered marker
+- `i0..i8` is the 3x3 depth intrinsics matrix flattened row-major
+- The depth payload itself is still raw little-endian `Float32` data in meters once base64-decoded
+- Small control messages such as `hello` and `hello_ack` still use JSON
 
 ## Backend
 
@@ -72,7 +54,7 @@ The relay listens on `http://localhost:8080`.
 
 Clients can connect with `?role=publisher` or `?role=subscriber`. The browser viewer already connects as a subscriber.
 
-The browser viewer prefers binary frames and keeps only the latest pending frame to avoid multi-second render backlog under load.
+The browser viewer keeps only the latest pending frame to avoid multi-second render backlog under load.
 
 ## Railway
 
@@ -100,14 +82,13 @@ Open `HoloSpecLens` in Lens Studio and make sure the `HoloSpecDualFrameClient` c
 
 Important notes:
 
-- The Lens Studio client prefers binary frames and falls back to the legacy JSON path if needed.
-- Depth is consumed directly from raw `Float32` bytes.
-- RGB still uses Lens Studio's base64 texture decode path locally after binary receipt, which keeps the network transport binary while avoiding a custom JPEG decode path in the lens.
-- Lens Studio desktop Preview does not support this network streaming path. Test the subscriber in wearable runtime rather than expecting the editor Preview panel to open the WebSocket stream.
+- The Lens Studio client consumes the same `HSF2` text frame format as the web viewer.
+- Depth is reconstructed from base64-decoded raw `Float32` bytes.
+- RGB uses Lens Studio's `Base64.decodeTextureAsync(...)` path directly.
 
 ## Current Tradeoffs
 
 - RGB frames are JPEG-compressed for practicality.
 - Depth frames are sent as raw `Float32` values, which preserves metric depth but increases payload size.
-- The transport no longer pays base64 or giant JSON costs on the hot frame path, but RGB still incurs JPEG encode/decode work.
+- The transport avoids giant JSON frame parsing, but still pays base64 size overhead and RGB JPEG encode/decode work.
 - The relay is intentionally simple and does not persist frames or authenticate clients.
