@@ -74,7 +74,7 @@ Important notes:
 - The TrueDepth camera is only available on supported physical devices. The iOS simulator will compile but cannot provide real depth frames.
 - If the backend runs on your Mac, the app must use your Mac's LAN IP in the WebSocket URL. `localhost` from the phone points at the phone itself.
 - `Info.plist` currently allows arbitrary network loads so `ws://` can be used during development. Tighten ATS rules before production.
-- The sender is currently throttled to `4 FPS`, and each published frame contains synchronized RGB and depth together.
+- The sender is currently throttled to `8 FPS`, and each published frame contains synchronized RGB and depth together.
 
 ## Lens Studio
 

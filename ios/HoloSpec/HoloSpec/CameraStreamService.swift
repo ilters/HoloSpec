@@ -36,7 +36,7 @@ final class CameraStreamService: NSObject, ObservableObject {
     private let sessionQueue = DispatchQueue(label: "com.holospec.capture")
     private let ciContext = CIContext()
     private let streamId = UUID().uuidString
-    private let targetFrameInterval: TimeInterval = 0.25
+    private let targetFrameInterval: TimeInterval = 0.125
 
     private var configured = false
     private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
